@@ -72,6 +72,55 @@ namespace isadt{
 		    outHeadFile.close();
         }
 
+		
+		void  CPPCodeGenerator::generateHeaderFileWin(std::string path, Process* proc)
+        {
+            std::ofstream outHeadFile;
+		    //TODO: make sure here
+		    std::string tempFileName = proc->getName() + ".h";
+		    std::string outStr = "";
+		    // if def
+		    outStr += generateHeaderIfDef(proc);
+		    // generate includes 
+		    outStr += this->generateCommonIncludesWin();
+		    outStr += this->generateDependIncludes(proc);
+			std::cout << "generateStateDef" << std::endl;
+			outStr += this->generateStateDef(proc);
+			std::cout << "generateStateDefOver" << std::endl;
+
+			std::cout << "generate temp stores" << std::endl;
+			std::cout << "generate temp stores end" << std::endl;
+		    // generate attrs and methods declaration
+		    // attrs
+			outStr += this->generateClassPre(proc);
+			outStr += "\tprivate:\n";
+		    for (Attribute* attr : proc->getOriginalAttributes()) {
+		    	outStr += "\t\t" + this->appendAttrDef(outStr, attr);
+		    }
+			outStr += "\tpublic: \n";
+		    // methods
+		    for (Method* m : proc->getMethods()) {
+		    	outStr += "\t\t" + this->appendMethodDeclaration(outStr, m);
+		    }
+			for (CommMethod* m : proc->getCommMethods()){
+				outStr += "\t\t" + this->appendCommMethodDeclaration(outStr, m);   
+			}
+			outStr += "\t\tvoid SMLMain" + proc->getName() + "();\n"; 
+			outStr += "};\n";
+			
+			
+			std::cout << "genSrcMain" << std::endl;
+		    outStr += this->generateMain(proc);
+			
+			std::cout << "genSrcMainOver" << std::endl;
+		    //endif
+		    outStr += "#endif\n";
+			std::cout << outStr << std::endl;
+		    outHeadFile.open(path + "/generatedHeader" + "/" + tempFileName, std::ofstream::out | std::ostream::out);
+		    outHeadFile << outStr << std::endl;
+		    outHeadFile.close();
+        }
+
 		std::string CPPCodeGenerator::generateClassPre(Process* proc){
 			std::string result = "class " + proc->getName() + " {" + CR;
 			result += "\tprivate: \n";
@@ -84,6 +133,14 @@ namespace isadt{
 			"#include <iostream>\n#include <string>\n#include <vector>\n#include <stdlib.h>\n#include <thread>\n#include <stdlib.h>\n#include <sstream>\n";
 		    commonIncludes += INCLUDE_HEADER;
 		    commonIncludes += SERIALIZATION_INCLUDE;
+			return commonIncludes;
+        }
+
+		std::string  CPPCodeGenerator::generateCommonIncludesWin()
+        {
+            std::string commonIncludes =
+			"#include <iostream>\n#include <string>\n#include <vector>\n#include <stdlib.h>\n#include <thread>\n#include <stdlib.h>\n#include <sstream>\n";
+		    commonIncludes += INCLUDE_HEADER;
 			return commonIncludes;
         }
 
@@ -687,6 +744,67 @@ namespace isadt{
 			outUserTypeFile.close();
 		}
 
+		void CPPCodeGenerator::generateUserTypesWin(std::string path, Model* model)
+		{
+			std::ofstream outUserTypeFile;
+		    //TODO: make sure here
+		    std::string fileName = "UserType.hpp";
+		    std::string outStr = "";
+			std::cout << "generate Usertype" << std::endl;
+			outStr += this->generateCommonIncludesWin();
+			outStr += this->generateTimer();
+			for(UserType* u : model->getUserTypes())
+			{
+				//make sure 
+				if(!u->getName().compare("")){
+					continue;
+				}
+				if(u->getBase()){
+					outStr += ("class " + u->getName() + " : public " + u->getBase()->getName() + "{") + CR;
+				} else {
+					outStr += ("class " + u->getName() + "{") + CR;
+				}
+				outStr += "\tpublic:\n";
+				if(!u->getName().compare("ByteVec")){
+					outStr += "\t\tstd::string str;\n";
+				}
+				for(Attribute* a : u->getAttributes())
+				{
+					outStr += "\t\t" + (a->getType()->getName() + " " + a->getIdentifier()) + ";\n";
+				}
+				if(!u->getName().compare("ByteVec")){
+					outStr += "\t\tstd::string getStr();\n";
+				}
+				for(Method* m : u->getMethods()){
+					outStr += "\t\t" + (m->getReturnType()->getName() + " " + m->getName() + "(");
+					int i = 1;
+					if(m->getAttributes().size() > 0){
+						for(Attribute* a : m->getAttributes()){
+							if(i < m->getAttributes().size()){	
+								outStr += a->getType()->getName() + " " + a->getIdentifier() + ", ";
+							} else {
+								outStr += a->getType()->getName() + " " + a->getIdentifier() + "){\n";
+							}
+						}
+					} else {
+						outStr += "){\n";
+					}
+					
+					outStr += "\t\t\t" + m->getReturnType()->getName() + " " + "result;\n";
+					outStr += 
+				//outStr += this->generateByteVecAndTimer();"\t\t\treturn result;\n"; 
+					outStr += "\t\t}\n";
+				}
+				outStr += "};\n";
+				std::cout << outStr << std::endl;
+			}
+			
+			std::cout << "end usertypes" << std::endl;
+			outUserTypeFile.open(path  + "/" + fileName, std::ofstream::out | std::ostream::out);
+			outUserTypeFile << outStr << std::endl;
+			outUserTypeFile.close();
+		}
+
 		std::string CPPCodeGenerator::generateSerializeBinding(Model* model){
 			std::string outStr = "namespace boost{\n";
 			outStr += "\tnamespace serialization{\n";
@@ -744,10 +862,36 @@ namespace isadt{
 			outCompileFile.close();
 		}
 
+		
+		void CPPCodeGenerator::generateCompileFileWin(std::string path, Model* model)
+		{
+			std::ofstream outCompileFile;
+			std::cout << "generate compile auxiliary" << std::endl;
+			std::string outStr = "import os\n";
+			outStr += "import sys\n";
+			for(Process* proc : model->getProcesses())
+			{
+				outStr += "os.system(\"g++ -g -o " + proc->getName() + " ./generatedSrc/" + proc->getName() +  ".cpp\")\n";
+				outStr += "t = os.path.isfile(\"./" + proc->getName() + "\")\n";
+				outStr += "if t:\n";
+				outStr += "\tos.system(\"echo #false#\")\n";
+			}
+			outCompileFile.open(path  + "/compile.py", std::ofstream::out | std::ostream::out);
+			outCompileFile << outStr << std::endl;
+			std::cout << outStr << std::endl;
+			outCompileFile.close();
+		}
+
 		/*---------Gen---------*/
         void  CPPCodeGenerator::generateCodeProc(std::string path, Process* proc)
 		{
 			this->generateHeaderFile(path, proc);
+			this->generateSrcFile(path, proc);
+		}
+		
+
+		void CPPCodeGenerator::generateCodeProcWin(std::string path, Process* proc){
+			this->generateHeaderFileWin(path, proc);
 			this->generateSrcFile(path, proc);
 		}
 
@@ -759,6 +903,14 @@ namespace isadt{
 				this->generateCodeProc(path, proc);
 			}
 			this->generateCompileFile(path, model);
+		}
+
+		void CPPCodeGenerator::generateAllWin(std::string path, Model* model){
+			this->generateUserTypesWin(path, model);
+			for(Process* proc : model->getProcesses()){
+				this->generateCodeProcWin(path, proc);
+			}
+			this->generateCompileFileWin(path, model);
 		}
 
 		void CPPCodeGenerator::generateRefine(std::string path, Model* model){

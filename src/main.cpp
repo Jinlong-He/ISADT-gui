@@ -6,7 +6,6 @@
 #include "../include/CodeGenerator/CCodeGenerator.hpp"
 #include "../include/CodeGenerator/CPPCodeGenerator.hpp"
 #include "../include/CodeGenerator/JavaCodeGenerator.hpp"
-#include "../include/Verifier/ProverifTranslator.hpp"
 #include "../include/Manage.hpp"
 #include "../include/Parser/ArgParser/argparse.hpp"
 using namespace std;
@@ -68,12 +67,6 @@ int main(int argc, char *argv[]) {
         .help("set the real engine for generator")
         .default_value(false)
         .implicit_value(true);
-    program.add_argument("-NS")
-        .default_value(false)
-        .implicit_value(true);
-    program.add_argument("-NS1")
-            .default_value(false)
-            .implicit_value(true);
     program.add_argument("-w", "--win")
         .help("generate (and run) on windows")
         .default_value(false)
@@ -121,17 +114,6 @@ int main(int argc, char *argv[]) {
         XmlParser::parse(file.c_str(), &model);
         if (program["-v"] == true) {
             if (program["-engine=proverif"] == true) {
-                auto proc = model.getProcesses().front();
-                auto sm = proc->getStateMachines().front();
-                if (program["-NS"] == true) {
-                    system("./proverif NS.pv");
-                }
-                else if (program["-NS1"] == true) {
-                    system("./proverif NS-old.pv");
-                }
-                ProverifTranslator* proverifTranslator = new ProverifTranslator();
-                proverifTranslator->proverifTranslate(&model);
-                system("./proverif verifiy.pv");
             } else if (program["-engine=beagle"] == true) {
                 //this is an example for make a statemahine for beagle.
                 auto proc = model.getProcesses().front();
@@ -151,7 +133,6 @@ int main(int argc, char *argv[]) {
             } else if (program["-engine=real"] == true) {
                 cout << "real" << endl;
             } else if(program["--refine"] == true){
-                std::cout << "heeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee" << std::endl;
                 std::cout << "refine";
                 if (program["-w"] == true)
                 {
@@ -261,7 +242,7 @@ int main(int argc, char *argv[]) {
             } 
             else {
                 std::cout << "else";
-                if (program["-w"] == true)
+                if (program["-w"] == true || program["--win"] == true)
                 {
                     cout << "-w" << endl;
                     if (program["--c"] == true)
@@ -270,7 +251,7 @@ int main(int argc, char *argv[]) {
                         /* generate code, windows, C code */
                         std::string path = "../../../generated";
                         CCodeGenerator gen;
-                        gen.generateAll(path, &model);
+                        gen.generateAllWin(path, &model);
                         cout << "generate code, windows, C code" << endl;
                     }else if (program["--cpp"] == true)
                     {
@@ -279,7 +260,7 @@ int main(int argc, char *argv[]) {
 
                         std::string path = "../../../generated";
                         CPPCodeGenerator gen;
-                        gen.generateAll(path, &model);
+                        gen.generateAllWin(path, &model);
                         cout << "generate code, windows, C++ code" << endl;
                     }else if (program["--java"] == true)
                     {
@@ -294,7 +275,7 @@ int main(int argc, char *argv[]) {
                         
                         std::string path = "../../../generated";
                         CCodeGenerator gen;
-                        gen.generateAll(path, &model);
+                        gen.generateAllWin(path, &model);
                         cout << "generate code, windows, C code" << endl;
                     }
                 } else if (program["-lin"] == true)
@@ -373,7 +354,7 @@ int main(int argc, char *argv[]) {
             } else if (program["-engine=real"] == true) {
                 cout << "real" << endl;
             } else {
-                if (program["-w"] == true)
+                if (program["-w"] == true || program["--win"] == true)
                 {
                     cout << "-w" << endl;
                     if (program["--c"] == true)
@@ -382,7 +363,7 @@ int main(int argc, char *argv[]) {
                         /* generate and run code, windows, C code */
                         std::string path = "../../../generated";
                         CCodeGenerator gen;
-                        gen.generateAll(path, &model);
+                        gen.generateAllWin(path, &model);
 
                         cout << "generate and run code,PCodeGenerator windows, C code" << endl;
                         //system("python3 ./generated/compileAndRun.py");
@@ -392,7 +373,7 @@ int main(int argc, char *argv[]) {
                         /* generate and run code, windows, C++ code */
                         std::string path = "../../../generated";
                         CPPCodeGenerator gen;
-                        gen.generateAll(path, &model);
+                        gen.generateAllWin(path, &model);
                         cout << "generate and run code, windows, C++ code" << endl;
                     }else if (program["--java"] == true)
                     {
@@ -413,7 +394,7 @@ int main(int argc, char *argv[]) {
                         cout << "--c" << endl;
                         std::string path = "../../../generated";
                         CCodeGenerator gen;
-                        gen.generateAll(path, &model);
+                        gen.generateAllWin(path, &model);
 
                         cout << "generate and run code,PCodeGenerator windows, C code" << endl;
                         system("python3 ./generatedcompileAndRun.py");
