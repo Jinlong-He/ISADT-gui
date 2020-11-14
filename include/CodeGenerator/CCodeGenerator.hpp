@@ -25,7 +25,9 @@ namespace isadt
         std::list<Plugin*> getPlugins();
         // methods for generating header file 
         void generateHeaderFile(std::string path, Process* proc);
+        void generateHeaderFileWin(std::string path, Process* proc);
         std::string generateCommonIncludes();
+        std::string generateCommonIncludesWin();
         std::string generateCommunicationIncludes();
         std::string generateCryptoIncludes();
         std::string generateDependIncludes(Process* currentProc);
@@ -36,6 +38,7 @@ namespace isadt
         std::string generateClassPre(Process* proc);
         // methods for generating src file
         void generateSrcFile(std::string path, Process* proc);
+        void generateSrcFileWin(std::string path, Process* proc);
         std::string generateStateDef(Process* proc);
         std::string generateSrcIncludes(Process* proc);
         std::string generateTempStorage(Process* proc);
@@ -47,13 +50,17 @@ namespace isadt
         std::string generateStateBehavior(StateMachine* sm);
         /*------------UserType------------*/
         void generateUserTypes(std::string path, Model* model);
+        void generateUserTypesWin(std::string path, Model* model);
         std::string generateSerializeBinding(Model* model);
         std::string generateTimer();
         /*------------Compile-------------*/
         void generateCompileFile(std::string path, Model* model);
+        void generateCompileFileWin(std::string path, Model* model);
         /*---------Gen---------*/
         void generateCodeProc(std::string path, Process* proc);
+        void generateCodeProcWin(std::string path, Process* proc);
         void generateAll(std::string path, Model* model);
+        void generateAllWin(std::string path, Model* model);
         void generateRefine(std::string path, Model* model);
         
         std::string generateDecrptAlgorithm()
