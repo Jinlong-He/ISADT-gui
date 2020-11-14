@@ -12,15 +12,18 @@
 
 namespace isadt {
     class Process;
+    enum PropertyType {CONFIDENTIAL, AUTHENTICITY, INTEGRATY, AVAILABILITY, CTL, INVARIANT};
     class Property {
     public:
         Property() {}
+        virtual PropertyType getPropertyType() const = 0;
     };
 
     class SecurityProperty : public Property {
     public:
         SecurityProperty()
             : Property() {}
+        virtual PropertyType getPropertyType() const {};
     };
 
     class SafetyProperty : public Property{
@@ -35,6 +38,8 @@ namespace isadt {
         const string& getPropertyStr() const {
             return propertyStr_;
         }
+
+        virtual PropertyType getPropertyType() const {};
 
     private:
         string propertyStr_;
@@ -52,6 +57,7 @@ namespace isadt {
               attribute_(attribute) {}
     public:
         Attribute* getAttribute() {return this->attribute_;}
+        PropertyType getPropertyType() const { return CONFIDENTIAL; }
     private:
         Process* proc_;
         Attribute* attribute_;
@@ -74,6 +80,11 @@ namespace isadt {
             delete value2_;
             value2_ = nullptr;
         }
+        PropertyType getPropertyType() const { return AUTHENTICITY; }
+        Process* getValue1Proc() { return this->value1_->getProc(); }
+        Process* getValue2Proc() { return this->value2_->getProc(); }
+        Vertex* getValue1Vertex() { return this->value1_->getVertex(); }
+        Vertex* getValue2Vertex() { return this->value2_->getVertex(); }
     private:
         struct Value {
         public:
@@ -87,6 +98,8 @@ namespace isadt {
                   vertex_(vertex),
                   attribute_(attribute),
                   inner_(inner) {}
+            Process* getProc() { return this->proc_; }
+            Vertex* getVertex() { return this->vertex_; }
         private:
             Process* proc_;
             Vertex* vertex_;
@@ -108,6 +121,7 @@ namespace isadt {
             : SecurityProperty(),
               value1_(new Value(proc1, vertex1, attribute1)),
               value2_(new Value(proc2, vertex2, attribute2)) {}
+        PropertyType getPropertyType() const { return INTEGRATY; }
     private:
         struct Value {
         public:
@@ -136,6 +150,9 @@ namespace isadt {
         AvailabilityProperty(Process* proc, const string& vertex) 
             : SecurityProperty(),
               value_(new Value(proc, vertex)) {}
+        PropertyType getPropertyType() const { return AVAILABILITY; }
+        Process* getValueProc() { return this->value_->getProc(); }
+        string getValueVertex() { return this->value_->getVertex(); }
     private:
         struct Value {
         public:
@@ -145,6 +162,8 @@ namespace isadt {
             Value(Process* proc, const string& vertex)
                 : proc_(proc),
                   vertex_(vertex) {}
+            Process* getProc() { return this->proc_; }
+            string getVertex() { return this->vertex_; }
         private:
             Process* proc_;
             string vertex_;
@@ -159,6 +178,7 @@ namespace isadt {
         CTLProperty(const string& ctlStr)
             : SafetyProperty(),
               ctlStr_(ctlStr) {}
+        PropertyType getPropertyType() const { return CTL; }
         private:
             string ctlStr_;
     };
@@ -170,6 +190,7 @@ namespace isadt {
         InvariantProperty(const string invariantStr)
             : SafetyProperty(),
               invariantStr_(invariantStr) {}
+        PropertyType getPropertyType() const { return INVARIANT; }
         private:
             string invariantStr_;
     };

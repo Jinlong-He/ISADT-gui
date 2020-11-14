@@ -7,7 +7,7 @@ namespace isadt {
         for (auto process : processes) {
             result += mkProcess(process, model);
         }
-        result += mkDefaultProcess(model);
+        //result += mkDefaultProcess(model);
         return result;
     }
 }

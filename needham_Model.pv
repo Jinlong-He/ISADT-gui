@@ -1,0 +1,98 @@
+free c : channel .
+type ByteVec.
+type MsgAlice1.
+type MsgAlice2.
+type MsgBob1.
+type msg.
+type host.
+type int.
+type nonce.
+type pk.
+type sk.
+type spk.
+type ssk.
+
+fun nonce_to_bitstring(nonce): bitstring [data,typeConverter].
+
+(* Public key encryption *)
+
+fun pk1(sk): pk.
+fun encrypt(bitstring, pk): bitstring.
+reduc forall x: bitstring, y: sk; decrypt(encrypt(x,pk1(y)),y) = x.
+
+(* Signatures *)
+
+fun spk1(ssk): spk.
+fun sign(bitstring, ssk): bitstring.
+reduc forall m: bitstring, k: ssk; getmess(sign(m,k)) = m.
+reduc forall m: bitstring, k: ssk; checksign(sign(m,k), spk1(k)) = m.
+
+(* Shared key encryption *)
+
+fun sencrypt(bitstring,nonce): bitstring.
+reduc forall x: bitstring, y: nonce; sdecrypt(sencrypt(x,y),y) = x.
+
+fun aenc(bitstring,pk):bitstring.
+reduc forall x:bitstring,y:sk;adec(aenc(x,pk1(y)),y)=x.
+
+fun SymEnc(int, pk):int.
+reduc forall m:int, k:sk;SymDec(SymEnc(m,pk1(k)),k)=m.
+free Na,Nb: bitstring [private].
+query secret nonceA;
+      secret nonceB.
+event Alice__init().
+event Alice__final().
+event Bob__init().
+event Bob__final().
+event Alice_Verify_State().
+event Alice_Alice_State_1().
+event Alice_Alice_State_3().
+event Bob_Bob_State_2().
+event Alice_Alice_State_2().
+event Bob_Verify_State2().
+event Bob_Bob_State_3().
+event Bob_Bob_State_1().
+let Alice(pka: pk)=
+	new nonce: int;
+	new alice: int;
+	new bob: int;
+	new pka: pk;
+	new pkb: pk;
+	new ska: sk;
+	event Alice__init();
+	event Alice_Alice_State_1();
+	let msgAlice1=nonce in
+	let msgAlice1=alice in
+	let msgAlice1=SymEnc(msgAlice1, pkb) in
+	event Alice_Alice_State_2();
+	let msgBob1=SymDec(bv, ska) in
+	event Alice_Verify_State();
+	event Alice_Alice_State_3();
+	let msgAlice2=msgBob1 in
+	let bv2=SymEnc(msgAlice2, pkb) in
+	event Alice__final();
+	0.
+
+let Bob(pkb: pk)=
+	new nonce: int;
+	new bob: int;
+	new pka: pk;
+	new pkb: pk;
+	new skb: sk;
+	event Bob__init();
+	event Bob_Bob_State_1();
+	let msgAlice1=SymDec(ma1, skb) in
+	event Bob_Bob_State_2();
+	let msgBob1=msgAlice1 in
+	let msgBob1=nonce in
+	let mb1=SymEnc(msgBob1, pka) in
+	event Bob_Bob_State_3();
+	let msgAlice2=SymDec(ma2, skb) in
+	event Bob_Verify_State2();
+	event Bob__final();
+	0.
+
+process 
+	new ska :sk; let pka= pk1(ska) in out(c, pka);
+	new skb :sk; let pkb= pk1(skb) in out(c, pkb);
+	((!Alice(pka))|(!Bob(pkb)))

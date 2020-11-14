@@ -1,0 +1,64 @@
+free c : channel .
+type ByteVec.
+type msg.
+type host.
+type int.
+type nonce.
+type pk.
+type sk.
+type spk.
+type ssk.
+
+fun nonce_to_bitstring(nonce): bitstring [data,typeConverter].
+
+(* Public key encryption *)
+
+fun pk1(sk): pk.
+fun encrypt(bitstring, pk): bitstring.
+reduc forall x: bitstring, y: sk; decrypt(encrypt(x,pk1(y)),y) = x.
+
+(* Signatures *)
+
+fun spk1(ssk): spk.
+fun sign(bitstring, ssk): bitstring.
+reduc forall m: bitstring, k: ssk; getmess(sign(m,k)) = m.
+reduc forall m: bitstring, k: ssk; checksign(sign(m,k), spk1(k)) = m.
+
+(* Shared key encryption *)
+
+fun sencrypt(bitstring,nonce): bitstring.
+reduc forall x: bitstring, y: nonce; sdecrypt(sencrypt(x,y),y) = x.
+
+fun SymEnc(ByteVec, ByteVec):ByteVec.
+reduc forall m:ByteVec, k:ByteVec;SymDec(SymEnc(m,k),k)=m.
+
+fun pkByte(ByteVec):ByteVec.
+fun AsymEnc(ByteVec, ByteVec):ByteVec.
+reduc forall m:ByteVec, k:ByteVec;AsymDec(AsymEnc(m,pkByte(k)),k)=m.
+event P1__init().
+event P1__final().
+event P2__init().
+event P2__final().
+event P2_S3().
+event P1_S2().
+query secret alice.
+let P1()=
+	new a: ByteVec;
+	new b: ByteVec;
+	new alice: ByteVec;
+	event P1__init();
+	event P1_S2();
+	let alice=SymEnc(a, b) in
+	event P1__final();
+	0.
+
+let P2()=
+	new bob: ByteVec;
+	event P2__init();
+	event P2_S3();
+	let bob=bob in
+	event P2__final();
+	0.
+
+process 
+	((!P1())|(!P2()))

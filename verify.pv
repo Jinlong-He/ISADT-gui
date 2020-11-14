@@ -1,8 +1,7 @@
 free c : channel .
 type ByteVec.
-type message1.
-type message3.
-type message2.
+type Msg.
+type Key.
 type host.
 type nonce.
 type pkey.
@@ -36,16 +35,15 @@ reduc forall x:bitstring,y:skey;adec(aenc(x,pk(y)),y)=x.
 free Na,Nb: bitstring [private].
 query secret nonceA;
       secret nonceB.
-event Bob_State_1().
-event Verify_State_1().
-event Alice_State_1().
+event S3().
+event S2().
+event S4().
+event S5().
 event beginBparam(pkey).
 event endBparam(pkey).
 event beginAparam(pkey).
 event endAparam(pkey).
 
-let Alice()=
-let Bob()=
 let processA(pkB: pkey, skA: skey) =
 	in(c, pkX: pkey);
 	event beginBparam(pkX); 

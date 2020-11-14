@@ -1,0 +1,2 @@
+/usr/bin/ar qc libCodeGenerator.a  CMakeFiles/CodeGenerator.dir/CCodeGenerator.cpp.o CMakeFiles/CodeGenerator.dir/CPPCodeGenerator.cpp.o CMakeFiles/CodeGenerator.dir/JavaCodeGenerator.cpp.o CMakeFiles/CodeGenerator.dir/CodeGenerator.cpp.o CMakeFiles/CodeGenerator.dir/ImpleCodeGenerator.cpp.o CMakeFiles/CodeGenerator.dir/Plugin.cpp.o
+/usr/bin/ranlib libCodeGenerator.a

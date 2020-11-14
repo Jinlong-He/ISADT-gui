@@ -1,0 +1,86 @@
+<Protocol name="协议1">
+  <ClassDiagram>
+    <UserType name="int" basic="true" />
+    <UserType name="bool" basic="true" />
+    <UserType name="number" basic="true" />
+    <UserType name="byte" basic="true" />
+    <UserType name="ByteVec" basic="middle" />
+    <UserType name="Timer" basic="middle" />
+    <Process name="P1">
+      <Attribute type="ByteVec" identifier="a" isArray="False" />
+      <Attribute type="ByteVec" identifier="b" isArray="False" />
+      <Attribute type="ByteVec" identifier="alice" isArray="False" />
+      <Method returnType="ByteVec" name="SymEnc" cryptoSuffix="AES" achieve="">
+        <Parameter type="ByteVec" identifier="msg" isArray="False" />
+        <Parameter type="ByteVec" identifier="key" isArray="False" />
+      </Method>
+      <Method returnType="ByteVec" name="SymDec" cryptoSuffix="AES" achieve="">
+        <Parameter type="ByteVec" identifier="msg" isArray="False" />
+        <Parameter type="ByteVec" identifier="key" isArray="False" />
+      </Method>
+      <Method returnType="ByteVec" name="AsymEnc" cryptoSuffix="RSA" achieve="">
+        <Parameter type="ByteVec" identifier="msg" isArray="False" />
+        <Parameter type="ByteVec" identifier="pkey" isArray="False" />
+      </Method>
+      <Method returnType="ByteVec" name="AsymDec" cryptoSuffix="RSA" achieve="">
+        <Parameter type="ByteVec" identifier="msg" isArray="False" />
+        <Parameter type="ByteVec" identifier="skey" isArray="False" />
+      </Method>
+      <Method returnType="ByteVec" name="Sign" cryptoSuffix="RSA" achieve="">
+        <Parameter type="ByteVec" identifier="msg" isArray="False" />
+        <Parameter type="ByteVec" identifier="skey" isArray="False" />
+      </Method>
+      <Method returnType="bool" name="Verify" cryptoSuffix="RSA" achieve="">
+        <Parameter type="ByteVec" identifier="msg" isArray="False" />
+        <Parameter type="ByteVec" identifier="pkey" isArray="False" />
+      </Method>
+    </Process>
+    <Process name="P2">
+      <Attribute type="ByteVec" identifier="bob" isArray="False" />
+      <Method returnType="ByteVec" name="SymEnc" cryptoSuffix="AES" achieve="">
+        <Parameter type="ByteVec" identifier="msg" isArray="False" />
+        <Parameter type="ByteVec" identifier="key" isArray="False" />
+      </Method>
+      <Method returnType="ByteVec" name="SymDec" cryptoSuffix="AES" achieve="">
+        <Parameter type="ByteVec" identifier="msg" isArray="False" />
+        <Parameter type="ByteVec" identifier="key" isArray="False" />
+      </Method>
+      <Method returnType="ByteVec" name="AsymEnc" cryptoSuffix="RSA" achieve="">
+        <Parameter type="ByteVec" identifier="msg" isArray="False" />
+        <Parameter type="ByteVec" identifier="pkey" isArray="False" />
+      </Method>
+      <Method returnType="ByteVec" name="AsymDec" cryptoSuffix="RSA" achieve="">
+        <Parameter type="ByteVec" identifier="msg" isArray="False" />
+        <Parameter type="ByteVec" identifier="skey" isArray="False" />
+      </Method>
+      <Method returnType="ByteVec" name="Sign" cryptoSuffix="RSA" achieve="">
+        <Parameter type="ByteVec" identifier="msg" isArray="False" />
+        <Parameter type="ByteVec" identifier="skey" isArray="False" />
+      </Method>
+      <Method returnType="bool" name="Verify" cryptoSuffix="RSA" achieve="">
+        <Parameter type="ByteVec" identifier="msg" isArray="False" />
+        <Parameter type="ByteVec" identifier="pkey" isArray="False" />
+      </Method>
+    </Process>
+  </ClassDiagram>
+  <ProcessToSMs>
+    <ProcessToSM process="P1">
+      <StateMachine refine_state="">
+        <Transition source="_init" dest="S2" />
+        <State name="S2" />
+        <Transition source="S2" dest="_final" guard="">
+          <Action content="alice=SymEnc(a, b)" />
+        </Transition>
+      </StateMachine>
+    </ProcessToSM>
+    <ProcessToSM process="P2">
+      <StateMachine refine_state="">
+        <Transition source="_init" dest="S3" />
+        <State name="S3" />
+        <Transition source="S3" dest="_final" guard="">
+          <Action content="bob = bob" />
+        </Transition>
+      </StateMachine>
+    </ProcessToSM>
+  </ProcessToSMs>
+</Protocol>

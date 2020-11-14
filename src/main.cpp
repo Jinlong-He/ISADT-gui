@@ -121,8 +121,8 @@ int main(int argc, char *argv[]) {
         XmlParser::parse(file.c_str(), &model);
         if (program["-v"] == true) {
             if (program["-engine=proverif"] == true) {
-                auto proc = model.getProcesses().front();
-                auto sm = proc->getStateMachines().front();
+                //auto proc = model.getProcesses().front();
+                //auto sm = proc->getStateMachines().front();
                 if (program["-NS"] == true) {
                     system("./proverif NS.pv");
                 }
@@ -131,7 +131,7 @@ int main(int argc, char *argv[]) {
                 }
                 ProverifTranslator* proverifTranslator = new ProverifTranslator();
                 proverifTranslator->proverifTranslate(&model);
-                system("./proverif verifiy.pv");
+                system("./proverif proverifModel.pv");
             } else if (program["-engine=beagle"] == true) {
                 //this is an example for make a statemahine for beagle.
                 auto proc = model.getProcesses().front();

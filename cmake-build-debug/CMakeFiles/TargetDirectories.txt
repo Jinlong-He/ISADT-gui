@@ -1,0 +1,14 @@
+/home/wqy/文档/integrate/ISDAT-gui/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+/home/wqy/文档/integrate/ISDAT-gui/cmake-build-debug/CMakeFiles/edit_cache.dir
+/home/wqy/文档/integrate/ISDAT-gui/cmake-build-debug/src/CMakeFiles/rebuild_cache.dir
+/home/wqy/文档/integrate/ISDAT-gui/cmake-build-debug/src/CMakeFiles/edit_cache.dir
+/home/wqy/文档/integrate/ISDAT-gui/cmake-build-debug/src/CMakeFiles/isadt.dir
+/home/wqy/文档/integrate/ISDAT-gui/cmake-build-debug/src/Model/CMakeFiles/rebuild_cache.dir
+/home/wqy/文档/integrate/ISDAT-gui/cmake-build-debug/src/Model/CMakeFiles/edit_cache.dir
+/home/wqy/文档/integrate/ISDAT-gui/cmake-build-debug/src/Model/CMakeFiles/Model.dir
+/home/wqy/文档/integrate/ISDAT-gui/cmake-build-debug/src/Parser/CMakeFiles/rebuild_cache.dir
+/home/wqy/文档/integrate/ISDAT-gui/cmake-build-debug/src/Parser/CMakeFiles/edit_cache.dir
+/home/wqy/文档/integrate/ISDAT-gui/cmake-build-debug/src/Parser/CMakeFiles/Parser.dir
+/home/wqy/文档/integrate/ISDAT-gui/cmake-build-debug/src/CodeGenerator/CMakeFiles/rebuild_cache.dir
+/home/wqy/文档/integrate/ISDAT-gui/cmake-build-debug/src/CodeGenerator/CMakeFiles/edit_cache.dir
+/home/wqy/文档/integrate/ISDAT-gui/cmake-build-debug/src/CodeGenerator/CMakeFiles/CodeGenerator.dir
