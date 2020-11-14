@@ -1,0 +1,82 @@
+<Protocol name="协议1">
+  <ClassDiagram>
+    <UserType name="int" basic="true" />
+    <UserType name="bool" basic="true" />
+    <UserType name="number" basic="true" />
+    <UserType name="byte" basic="true" />
+    <UserType name="ByteVec" basic="middle" />
+    <UserType name="Timer" basic="middle" />
+    <Process name="Alice">
+      <Attribute type="int" identifier="nonceA" isArray="False" />
+      <Attribute type="int" identifier="alice" isArray="False" />
+      <Attribute type="int" identifier="bob" isArray="False" />
+      <Attribute type="message1" identifier="m1" isArray="False" />
+      <Attribute type="message3" identifier="m3" isArray="False" />
+      <Attribute type="message2" identifier="m2" isArray="False" />
+      <CommMethod name="receive" inOutSuffix="In" commWay="NativeEthernetFrame">
+        <Parameter type="ByteVec" identifier="msg" isArray="False" />
+      </CommMethod>
+      <CommMethod name="send" inOutSuffix="Out" commWay="NativeEthernetFrame">
+        <Parameter type="ByteVec" identifier="msg" isArray="False" />
+      </CommMethod>
+    </Process>
+    <Process name="Bob">
+      <Attribute type="int" identifier="nonceB" isArray="False" />
+      <Attribute type="int" identifier="alice" isArray="False" />
+      <Attribute type="int" identifier="bob" isArray="False" />
+      <Attribute type="message2" identifier="m2" isArray="False" />
+      <Attribute type="message1" identifier="m1" isArray="False" />
+      <Attribute type="message3" identifier="m3" isArray="False" />
+      <CommMethod name="receive" inOutSuffix="In" commWay="NativeEthernetFrame">
+        <Parameter type="ByteVec" identifier="msg" isArray="False" />
+      </CommMethod>
+      <CommMethod name="send" inOutSuffix="Out" commWay="NativeEthernetFrame">
+        <Parameter type="ByteVec" identifier="msg" isArray="False" />
+      </CommMethod>
+    </Process>
+    <UserType name="message1" basic="false" parent="ByteVec">
+      <Attribute type="int" identifier="nonce" isArray="False" />
+      <Attribute type="int" identifier="id" isArray="False" />
+    </UserType>
+    <UserType name="message2" basic="false" parent="ByteVec">
+      <Attribute type="int" identifier="nonce1" isArray="False" />
+      <Attribute type="int" identifier="nonce2" isArray="False" />
+    </UserType>
+    <UserType name="message3" basic="false" parent="ByteVec">
+      <Attribute type="int" identifier="nonce" isArray="False" />
+    </UserType>
+  </ClassDiagram>
+  <ProcessToSMs>
+    <ProcessToSM process="Alice">
+      <StateMachine refine_state="">
+        <Transition source="_init" dest="Alice_State_1" guard="">
+          <Action content="m1.nonce=nonceA" />
+          <Action content="m1.id=alice" />
+          <Action content="send(m1)" />
+        </Transition>
+        <State name="Alice_State_1" />
+        <Transition source="Alice_State_1" dest="_final" guard="">
+          <Action content="receive(m2)" />
+          <Action content="m3.nonce=m2.nonce2" />
+          <Action content="send(m3)" />
+        </Transition>
+      </StateMachine>
+    </ProcessToSM>
+    <ProcessToSM process="Bob">
+      <StateMachine refine_state="">
+        <Transition source="_init" dest="Bob_State_1" guard="">
+          <Action content="receive(m1)" />
+          <Action content="m2.nonce1=m1.nonce" />
+          <Action content="m2.nonce2=nonceB" />
+          <Action content="send(m2)" />
+        </Transition>
+        <State name="Bob_State_1" />
+        <Transition source="Bob_State_1" dest="Verify_State_1" guard="">
+          <Action content="receive(m3)" />
+        </Transition>
+        <State name="Verify_State_1" />
+        <Transition source="Verify_State_1" dest="_final" guard="m3.nonce==nonceB" />
+      </StateMachine>
+    </ProcessToSM>
+  </ProcessToSMs>
+</Protocol>

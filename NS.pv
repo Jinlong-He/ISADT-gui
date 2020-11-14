@@ -1,0 +1,45 @@
+free c : channel .
+
+type pkey.
+type skey.
+fun pk(skey):pkey.
+fun aenc(bitstring,pkey):bitstring.
+reduc forall x:bitstring,y:skey;adec(aenc(x,pk(y)),y)=x.
+
+free Na,Nb: bitstring [private].
+query attacker(Nb).
+
+event Alice_State_1().
+event Alice_State_2().
+event Verify_State_1().
+event Bob_State_1().
+event Bob_State_2().
+event Bob_State_3().
+event Verify_State_2().
+
+let Alice(pkB:pkey,skA:skey)=
+	in(c,pkX:pkey);
+	event Alice_State_1();
+	new nonceA:bitstring;
+	new id:bitstring;
+	let ma1=aenc((nonceA,id),pkX) in
+	out(c,ma1);
+	event Alice_State_2();
+	in(c,mb:bitstring);
+	event Verify_State_1();
+	let (nonce1:bitstring,nonce2:bitstring)=adec(mb,skA) in
+	if nonce1=nonceA then
+	out(c,aenc(nonce2,pkX)).
+
+let Bob(pkA:pkey,skB:skey)=
+	event Bob_State_1();
+	in(c,m1:bitstring);
+	let (nonceA:bitstring,id:bitstring)=adec(m1,skB) in
+	out(c,aenc((nonceA,Nb),pkA));
+	in(c,ma2:bitstring);
+	if Nb=adec(ma2,skB) then 0.
+
+process
+	new skA:skey;let pkA=pk(skA) in out (c,pkA);
+	new skB:skey;let pkB=pk(skB) in out (c,pkB);
+	((!Alice(pkB,skA))|(!Bob(pkA,skB)))

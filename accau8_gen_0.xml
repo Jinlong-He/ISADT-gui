@@ -1,0 +1,306 @@
+<Protocol name="协议1">
+  <ClassDiagram>
+    <UserType name="int" basic="true" />
+    <UserType name="bool" basic="true" />
+    <UserType name="number" basic="true" />
+    <UserType name="byte" basic="true" />
+    <UserType name="ByteVec" basic="middle" />
+    <UserType name="Timer" basic="middle" />
+    <UserType name="Head" basic="false" parent="">
+      <Attribute type="int" identifier="version" isArray="False" />
+      <Attribute type="int" identifier="msgType" isArray="False" />
+      <Attribute type="int" identifier="seq" isArray="False" />
+      <Attribute type="int" identifier="length" isArray="False" />
+    </UserType>
+    <UserType name="GwAdvMsg" basic="false" parent="ByteVec">
+      <Attribute type="Head" identifier="head" isArray="False" />
+      <Attribute type="int" identifier="gateway" isArray="False" />
+      <Attribute type="int" identifier="gwInfo" isArray="False" />
+      <Attribute type="ByteVec" identifier="signature" isArray="False" />
+    </UserType>
+    <UserType name="AuthReqMsg" basic="false" parent="ByteVec">
+      <Attribute type="Head" identifier="head" isArray="False" />
+      <Attribute type="int" identifier="host" isArray="False" />
+      <Attribute type="int" identifier="gateway" isArray="False" />
+      <Attribute type="ByteVec" identifier="signature" isArray="False" />
+    </UserType>
+    <UserType name="AuthQueMsg" basic="false" parent="ByteVec">
+      <Attribute type="Head" identifier="head" isArray="False" />
+      <Attribute type="int" identifier="host" isArray="False" />
+      <Attribute type="int" identifier="server" isArray="False" />
+      <Attribute type="int" identifier="gateway" isArray="False" />
+      <Attribute type="ByteVec" identifier="signature" isArray="False" />
+      <Attribute type="int" identifier="nonce" isArray="False" />
+    </UserType>
+    <UserType name="QueRespMsg" basic="false" parent="ByteVec">
+      <Attribute type="Head" identifier="head" isArray="False" />
+      <Attribute type="int" identifier="host" isArray="False" />
+      <Attribute type="int" identifier="nonce" isArray="False" />
+      <Attribute type="ByteVec" identifier="signature" isArray="False" />
+    </UserType>
+    <UserType name="AuthRespMsg" basic="false" parent="ByteVec">
+      <Attribute type="Head" identifier="head" isArray="False" />
+      <Attribute type="int" identifier="host" isArray="False" />
+      <Attribute type="int" identifier="result" isArray="False" />
+      <Attribute type="int" identifier="authority" isArray="False" />
+      <Attribute type="int" identifier="hostIp" isArray="False" />
+      <Attribute type="int" identifier="gateway" isArray="False" />
+      <Attribute type="ByteVec" identifier="secHostIpSk" isArray="False" />
+      <Attribute type="int" identifier="server" isArray="False" />
+      <Attribute type="ByteVec" identifier="signature" isArray="False" />
+    </UserType>
+    <Process name="Host">
+      <Attribute type="int" identifier="hostId" isArray="False" />
+      <Attribute type="int" identifier="gateway" isArray="False" />
+      <Attribute type="int" identifier="nonce" isArray="False" />
+      <Attribute type="Key" identifier="serverPk" isArray="False" />
+      <Attribute type="AuthReqMsg" identifier="authReqMsg" isArray="False" />
+      <Attribute type="AuthQueMsg" identifier="authQueMsg" isArray="False" />
+      <Attribute type="QueRespMsg" identifier="queRespMsg" isArray="False" />
+      <Attribute type="AuthRespMsg" identifier="authRespMsg" isArray="False" />
+      <Attribute type="Key" identifier="hostIdSk" isArray="False" />
+      <Attribute type="Key" identifier="hostIdPk" isArray="False" />
+      <Attribute type="int" identifier="hostIp" isArray="False" />
+      <Attribute type="Key" identifier="hostIpSk" isArray="False" />
+      <Method returnType="ByteVec" name="SymEnc" cryptoSuffix="None" achieve="">
+        <Parameter type="ByteVec" identifier="msg" isArray="False" />
+        <Parameter type="ByteVec" identifier="key" isArray="False" />
+      </Method>
+      <Method returnType="ByteVec" name="SymDec" cryptoSuffix="None" achieve="">
+        <Parameter type="ByteVec" identifier="msg" isArray="False" />
+        <Parameter type="ByteVec" identifier="key" isArray="False" />
+      </Method>
+      <Method returnType="ByteVec" name="Sign" cryptoSuffix="None" achieve="">
+        <Parameter type="ByteVec" identifier="msg" isArray="False" />
+        <Parameter type="ByteVec" identifier="skey" isArray="False" />
+      </Method>
+      <Method returnType="bool" name="Verify" cryptoSuffix="None" achieve="">
+        <Parameter type="ByteVec" identifier="msg" isArray="False" />
+        <Parameter type="ByteVec" identifier="pkey" isArray="False" />
+      </Method>
+      <CommMethod name="recieve" inOutSuffix="In" commWay="NativeEthernetFrame">
+        <Parameter type="ByteVec" identifier="msg" isArray="False" />
+      </CommMethod>
+      <CommMethod name="send" inOutSuffix="Out" commWay="NativeEthernetFrame">
+        <Parameter type="ByteVec" identifier="msg" isArray="False" />
+      </CommMethod>
+    </Process>
+    <Process name="Gateway">
+      <Attribute type="int" identifier="hostId" isArray="False" />
+      <Attribute type="int" identifier="gateway" isArray="False" />
+      <Attribute type="int" identifier="server" isArray="False" />
+      <Attribute type="ByteVec" identifier="msg" isArray="False" />
+      <Attribute type="Key" identifier="hostIdPk" isArray="False" />
+      <Attribute type="Key" identifier="serverPk" isArray="False" />
+      <Attribute type="ByteVec" identifier="msg1" isArray="False" />
+      <Attribute type="ByteVec" identifier="msg2" isArray="False" />
+      <Attribute type="ByteVec" identifier="msg3" isArray="False" />
+      <Method returnType="ByteVec" name="Sign" cryptoSuffix="None" achieve="">
+        <Parameter type="ByteVec" identifier="msg" isArray="False" />
+        <Parameter type="ByteVec" identifier="skey" isArray="False" />
+      </Method>
+      <Method returnType="bool" name="Verify" cryptoSuffix="None" achieve="">
+        <Parameter type="ByteVec" identifier="msg" isArray="False" />
+        <Parameter type="ByteVec" identifier="pkey" isArray="False" />
+      </Method>
+      <CommMethod name="recvFromHost" inOutSuffix="In" commWay="NativeEthernetFrame">
+        <Parameter type="ByteVec" identifier="msg" isArray="False" />
+      </CommMethod>
+      <CommMethod name="sendToHost" inOutSuffix="Out" commWay="NativeEthernetFrame">
+        <Parameter type="ByteVec" identifier="msg" isArray="False" />
+      </CommMethod>
+      <CommMethod name="recvFromServer" inOutSuffix="In" commWay="UDP">
+        <Parameter type="ByteVec" identifier="msg" isArray="False" />
+      </CommMethod>
+      <CommMethod name="sendToServer" inOutSuffix="Out" commWay="UDP">
+        <Parameter type="ByteVec" identifier="msg" isArray="False" />
+      </CommMethod>
+    </Process>
+    <Process name="Server">
+      <Attribute type="int" identifier="hostId" isArray="False" />
+      <Attribute type="int" identifier="gateway" isArray="False" />
+      <Attribute type="int" identifier="server" isArray="False" />
+      <Attribute type="int" identifier="nonce" isArray="False" />
+      <Attribute type="AuthReqMsg" identifier="authReqMsg" isArray="False" />
+      <Attribute type="AuthQueMsg" identifier="authQueMsg" isArray="False" />
+      <Attribute type="QueRespMsg" identifier="queRespMsg" isArray="False" />
+      <Attribute type="AuthRespMsg" identifier="authRespMsg" isArray="False" />
+      <Attribute type="Key" identifier="serverSk" isArray="False" />
+      <Attribute type="Key" identifier="serverPk" isArray="False" />
+      <Attribute type="int" identifier="hostIp" isArray="False" />
+      <Attribute type="Key" identifier="hostIdPk" isArray="False" />
+      <Attribute type="Key" identifier="hostIpSk" isArray="False" />
+      <Attribute type="Key" identifier="secHostIpSk" isArray="False" />
+      <Method returnType="ByteVec" name="SymEnc" cryptoSuffix="None" achieve="">
+        <Parameter type="ByteVec" identifier="msg" isArray="False" />
+        <Parameter type="ByteVec" identifier="key" isArray="False" />
+      </Method>
+      <Method returnType="ByteVec" name="Sign" cryptoSuffix="None" achieve="">
+        <Parameter type="ByteVec" identifier="msg" isArray="False" />
+        <Parameter type="ByteVec" identifier="skey" isArray="False" />
+      </Method>
+      <Method returnType="bool" name="Verify" cryptoSuffix="None" achieve="">
+        <Parameter type="ByteVec" identifier="msg" isArray="False" />
+        <Parameter type="ByteVec" identifier="pkey" isArray="False" />
+      </Method>
+      <CommMethod name="recieve" inOutSuffix="In" commWay="UDP">
+        <Parameter type="ByteVec" identifier="msg" isArray="False" />
+      </CommMethod>
+      <CommMethod name="send" inOutSuffix="Out" commWay="UDP">
+        <Parameter type="ByteVec" identifier="msg" isArray="False" />
+      </CommMethod>
+    </Process>
+    <UserType name="Key" basic="false" parent="ByteVec">
+      <Attribute type="int" identifier="id" isArray="False" />
+    </UserType>
+    <InitialKnowledge process="Host">
+      <KeyPair pubProcess="Host" pubKey="hostIdSk" secProcess="Host" secKey="hostIdPk" />
+    </InitialKnowledge>
+    <InitialKnowledge process="Server">
+      <KeyPair pubProcess="Server" pubKey="serverPk" secProcess="Server" secKey="serverSk" />
+    </InitialKnowledge>
+    <InitialKnowledge process="">
+      <KeyPair pubProcess="Server" pubKey="hostIdPk" secProcess="Host" secKey="hostIdSk" />
+      <KeyPair pubProcess="Host" pubKey="serverPk" secProcess="Server" secKey="serverSk" />
+    </InitialKnowledge>
+    <CommChannel name="HostAndGateway">
+      <CommMethodPair id="1" processA="Host" commMethodA="send" processB="Gateway" commMethodB="recvFromHost" privacy="True" />
+      <CommMethodPair id="2" processA="Gateway" commMethodA="sendToHost" processB="Host" commMethodB="recieve" privacy="True" />
+    </CommChannel>
+    <CommChannel name="GatewayAndServer">
+      <CommMethodPair id="3" processA="Gateway" commMethodA="sendToServer" processB="Server" commMethodB="recieve" privacy="False" />
+      <CommMethodPair id="4" processA="Server" commMethodA="send" processB="Gateway" commMethodB="recvFromServer" privacy="False" />
+    </CommChannel>
+    <SecurityProperty name="Scr1">
+      <Confidential process="Server" attribute="hostIpSk" />
+      <Authenticity processA="Host" stateA="queRecieved" attributeA="authQueMsg" attributeA_Attr="nonce" processB="Server" stateB="queSent" attributeB="authQueMsg" attributeB_Attr="nonce" />
+    </SecurityProperty>
+  </ClassDiagram>
+  <ProcessToSMs>
+    <ProcessToSM process="Host">
+      <StateMachine refine_state="">
+        <Transition source="_init" dest="reqMsgCreated" guard="">
+          <Action content="authReqMsg.head.msgType = 2" />
+          <Action content="authReqMsg.host = hostId" />
+          <Action content="authReqMsg.gateway = gateway" />
+          <Action content="authReqMsg.signature = Sign(authReqMsg,hostIdSk)" />
+        </Transition>
+        <State name="reqMsgCreated" />
+        <Transition source="reqMsgCreated" dest="reqSent" guard="">
+          <Action content="send(authReqMsg)" />
+        </Transition>
+        <State name="reqSent" />
+        <Transition source="reqSent" dest="queRecieved" guard="">
+          <Action content="recieve(authQueMsg)" />
+        </Transition>
+        <State name="queRecieved" />
+        <Transition source="queRecieved" dest="queRespCreated" guard="Verify(authQueMsg, serverPk)">
+          <Action content="nonce = authQueMsg.nonce" />
+          <Action content="queRespMsg.head.msgType = 5" />
+          <Action content="queRespMsg.nonce = nonce" />
+          <Action content="queRespMsg.host = hostId" />
+          <Action content="queRespMsg.signature = Sign(queRespMsg, hostIdSk)" />
+        </Transition>
+        <Transition source="queRecieved" dest="verifyAuthQueFailed" guard="!Verify(authQueMsg, serverPk)" />
+        <State name="queRespCreated" />
+        <Transition source="queRespCreated" dest="queRespSent" guard="">
+          <Action content="send(queRespMsg)" />
+        </Transition>
+        <State name="queRespSent" />
+        <Transition source="queRespSent" dest="respRecved" guard="">
+          <Action content="recieve(authRespMsg)" />
+        </Transition>
+        <State name="respRecved" />
+        <Transition source="respRecved" dest="verifyAuthRespFailed" guard="!Verify(authRespMsg, serverPk)" />
+        <Transition source="respRecved" dest="_final" guard="Verify(authRespMsg, serverPk)">
+          <Action content="hostIp = authRespMsg.hostIp" />
+          <Action content="hostIpSk = SymDec(authRespMsg.secHostIpSk, hostIdSk)" />
+        </Transition>
+        <State name="verifyAuthQueFailed" />
+        <Transition source="verifyAuthQueFailed" dest="_final" />
+        <State name="verifyAuthRespFailed" />
+        <Transition source="verifyAuthRespFailed" dest="_final" />
+      </StateMachine>
+    </ProcessToSM>
+    <ProcessToSM process="Gateway">
+      <StateMachine refine_state="">
+        <Transition source="_init" dest="reqMsgRecved" guard="">
+          <Action content="recvFromHost(msg)" />
+        </Transition>
+        <State name="reqMsgRecved" />
+        <Transition source="reqMsgRecved" dest="reqMsgSent" guard="">
+          <Action content="sendToServer(msg)" />
+        </Transition>
+        <State name="reqMsgSent" />
+        <Transition source="reqMsgSent" dest="authQueRecved" guard="">
+          <Action content="recvFromServer(msg1)" />
+        </Transition>
+        <State name="authQueRecved" />
+        <Transition source="authQueRecved" dest="authQueSent" guard="">
+          <Action content="sendToHost(msg1)" />
+        </Transition>
+        <State name="authQueSent" />
+        <Transition source="authQueSent" dest="queRespRecved" guard="">
+          <Action content="recvFromHost(msg2)" />
+        </Transition>
+        <State name="queRespRecved" />
+        <Transition source="queRespRecved" dest="queRespSent" guard="">
+          <Action content="sendToServer(msg2)" />
+        </Transition>
+        <State name="queRespSent" />
+        <Transition source="queRespSent" dest="authRespRecved" guard="">
+          <Action content="recvFromServer(msg3)" />
+        </Transition>
+        <State name="authRespRecved" />
+        <Transition source="authRespRecved" dest="_final" guard="">
+          <Action content="sendToHost(msg3)" />
+        </Transition>
+      </StateMachine>
+    </ProcessToSM>
+    <ProcessToSM process="Server">
+      <StateMachine refine_state="">
+        <Transition source="_init" dest="reqRecved" guard="">
+          <Action content="recieve(authReqMsg)" />
+        </Transition>
+        <State name="reqRecved" />
+        <Transition source="reqRecved" dest="queCreated" guard="Verify(authRespMsg, hostIdPk)">
+          <Action content="hostId = authReqMsg.host" />
+          <Action content="authQueMsg.head.MsgType = 4" />
+          <Action content="authQueMsg.host = authReqMsg.host" />
+          <Action content="authQueMsg.nonce = nonce" />
+          <Action content="authQueMsg.server = server" />
+          <Action content="authQueMsg.signature = Sign(authQueMsg, serverSk)" />
+        </Transition>
+        <Transition source="reqRecved" dest="verifyReqFailed" guard="!Verify(authRespMsg, hostIdPk)" />
+        <State name="queCreated" />
+        <Transition source="queCreated" dest="queSent" guard="">
+          <Action content="send(authQueMsg)" />
+        </Transition>
+        <State name="queSent" />
+        <Transition source="queSent" dest="queRespRecved" guard="">
+          <Action content="recieve(queRespMsg)" />
+        </Transition>
+        <State name="queRespRecved" />
+        <Transition source="queRespRecved" dest="authRespCreated" guard="Verify(queRespMsg, hostIdPk) &amp;&amp; queRespMsg.nonce==nonce">
+          <Action content="authRespMsg.head.msgType = 3" />
+          <Action content="authRespMsg.host = queRespMsg.host" />
+          <Action content="authRespMsg.gateway = gateway" />
+          <Action content="authRespMsg.hostIp = hostIp" />
+          <Action content="secHostIpSk = SymEnc(hostIpSk, hostIdPk)" />
+          <Action content="authRespMsg.secHostIpSk = secHostIpSk" />
+          <Action content="authRespMsg.server = server" />
+          <Action content="authRespMsg.signature = Sign(authRespMsg, serverSk)" />
+        </Transition>
+        <Transition source="queRespRecved" dest="verifyQueRespFailed" guard="!Verify(queRespMsg, hostIdPk) || queRespMsg.nonce!=nonce" />
+        <State name="authRespCreated" />
+        <Transition source="authRespCreated" dest="_final" guard="">
+          <Action content="send(quthRespMsg)" />
+        </Transition>
+        <State name="verifyReqFailed" />
+        <Transition source="verifyReqFailed" dest="_final" />
+        <State name="verifyQueRespFailed" />
+        <Transition source="verifyQueRespFailed" dest="_final" />
+      </StateMachine>
+    </ProcessToSM>
+  </ProcessToSMs>
+</Protocol>

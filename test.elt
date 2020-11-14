@@ -1,0 +1,29 @@
+system
+	module test
+		int [0:16383] a;
+		int [0:16383] _init_S2_id;
+		int [0:16383] _init_S2_id_;
+		int [0:16383] _init_S2_id__;
+		int [0:16383] S2_S4_id;
+		label startup;
+		location _init_S2, _init, S2, S2_S4, _final;
+		init _init;
+		from _init to _init_S2 do {
+			_init_S2_id = a+2;
+			_init_S2_id_ = a+1;	
+			_init_S2_id__ = a+3;	
+		};
+		from _init_S2 to S2 provided (_init_S2_id == _init_S2_id_) do {
+			a = a;		
+		};
+		from S2 to S2_S4 provided !(S2_S4_id==0) do {
+			a = 2;		
+		};
+		from S2_S4 to S2;
+		from S4 to _final provided !(a > 5) do {
+			a = 3;		
+		};
+	end
+
+	INVARSPEC !(test.location == _final)
+end

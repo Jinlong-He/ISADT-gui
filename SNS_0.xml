@@ -1,0 +1,130 @@
+<Protocol name="协议1">
+  <ClassDiagram>
+    <UserType name="int" basic="true" />
+    <UserType name="bool" basic="true" />
+    <UserType name="number" basic="true" />
+    <UserType name="byte" basic="true" />
+    <UserType name="ByteVec" basic="middle" />
+    <UserType name="Timer" basic="middle" />
+    <UserType name="pk" basic="false" parent="ByteVec">
+      <Attribute type="int" identifier="id" isArray="False" />
+    </UserType>
+    <Process name="Alice">
+      <Attribute type="int" identifier="nonceA" isArray="False" />
+      <Attribute type="pk" identifier="pka" isArray="False" />
+      <Attribute type="pk" identifier="pkb" isArray="False" />
+      <Attribute type="sk" identifier="ska" isArray="False" />
+      <Method returnType="ByteVec" name="SymEnc" cryptoSuffix="AES" achieve="">
+        <Parameter type="ByteVec" identifier="msg" isArray="False" />
+        <Parameter type="int" identifier="key" isArray="False" />
+      </Method>
+      <Method returnType="ByteVec" name="SymDec" cryptoSuffix="AES" achieve="">
+        <Parameter type="ByteVec" identifier="msg" isArray="False" />
+        <Parameter type="int" identifier="key" isArray="False" />
+      </Method>
+      <CommMethod name="receive" inOutSuffix="In" commWay="NativeEthernetFrame">
+        <Parameter type="ByteVec" identifier="msg" isArray="False" />
+      </CommMethod>
+      <CommMethod name="send" inOutSuffix="Out" commWay="NativeEthernetFrame">
+        <Parameter type="ByteVec" identifier="msg" isArray="False" />
+      </CommMethod>
+    </Process>
+    <Process name="Bob">
+      <Attribute type="int" identifier="nonceB" isArray="False" />
+      <Attribute type="pk" identifier="pka" isArray="False" />
+      <Attribute type="pk" identifier="pkb" isArray="False" />
+      <Attribute type="sk" identifier="skb" isArray="False" />
+      <Method returnType="ByteVec" name="SymEnc" cryptoSuffix="AES" achieve="">
+        <Parameter type="ByteVec" identifier="msg" isArray="False" />
+        <Parameter type="int" identifier="key" isArray="False" />
+      </Method>
+      <Method returnType="ByteVec" name="SymDec" cryptoSuffix="AES" achieve="">
+        <Parameter type="ByteVec" identifier="msg" isArray="False" />
+        <Parameter type="int" identifier="key" isArray="False" />
+      </Method>
+      <CommMethod name="receive" inOutSuffix="In" commWay="NativeEthernetFrame">
+        <Parameter type="ByteVec" identifier="msg" isArray="False" />
+      </CommMethod>
+      <CommMethod name="send" inOutSuffix="Out" commWay="NativeEthernetFrame">
+        <Parameter type="ByteVec" identifier="msg" isArray="False" />
+      </CommMethod>
+    </Process>
+    <UserType name="MsgAlice1" basic="false" parent="ByteVec">
+      <Attribute type="int" identifier="nonce" isArray="False" />
+      <Attribute type="int" identifier="k" isArray="False" />
+    </UserType>
+    <UserType name="MsgAlice2" basic="false" parent="ByteVec">
+      <Attribute type="int" identifier="nonce" isArray="False" />
+    </UserType>
+    <UserType name="MsgBob1" basic="false" parent="ByteVec">
+      <Attribute type="int" identifier="nonce1" isArray="False" />
+      <Attribute type="int" identifier="nonce2" isArray="False" />
+      <Attribute type="pk" identifier="k" isArray="False" />
+    </UserType>
+    <UserType name="sk" basic="false" parent="ByteVec">
+      <Attribute type="int" identifier="id" isArray="False" />
+    </UserType>
+    <InitialKnowledge process="">
+      <KeyPair pubProcess="Alice" pubKey="pka" secProcess="Alice" secKey="ska" />
+      <KeyPair pubProcess="Bob" pubKey="pkb" secProcess="Bob" secKey="skb" />
+    </InitialKnowledge>
+    <SecurityProperty name="Scr1">
+      <Confidential process="Bob" attribute="nonceB" />
+      <Confidential process="Alice" attribute="nonceA" />
+    </SecurityProperty>
+  </ClassDiagram>
+  <ProcessToSMs>
+    <ProcessToSM process="Alice">
+      <StateMachine refine_state="">
+        <Transition source="_init" dest="Alice_State_1" />
+        <State name="Alice_State_1" />
+        <Transition source="Alice_State_1" dest="Alice_State_2" guard="">
+          <Action content="MsgAlice1 ma1" />
+          <Action content="ma1.nonce=nonceA" />
+          <Action content="ma1.k=pka" />
+          <Action content="send(SymEnc(ma1,pkb))" />
+        </Transition>
+        <State name="Alice_State_2" />
+        <Transition source="Alice_State_2" dest="Verify_State_2" guard="">
+          <Action content="MsgBob1 m" />
+          <Action content="receive(m)" />
+          <Action content="MsgBob1 mb=SymDec(m,ska)" />
+        </Transition>
+        <State name="Verify_State_2" />
+        <Transition source="Verify_State_2" dest="_final" guard="mb.nonce1==nonceA &amp;&amp; mb.k == pkb">
+          <Action content="MsgAlice2 ma2" />
+          <Action content="ma2.nonce=mb.nonce2" />
+          <Action content="send(SymEnc(ma2,pkb))" />
+        </Transition>
+      </StateMachine>
+    </ProcessToSM>
+    <ProcessToSM process="Bob">
+      <StateMachine refine_state="">
+        <Transition source="_init" dest="Bob_State_1" />
+        <State name="Bob_State_1" />
+        <Transition source="Bob_State_1" dest="Bob_State_2" guard="">
+          <Action content="MsgAlice1 m" />
+          <Action content="receive(m)" />
+          <Action content="MsgAlice1 msgAlice1=SymDec(m,skb)" />
+        </Transition>
+        <State name="Bob_State_2" />
+        <Transition source="Bob_State_2" dest="Bob_State_3" guard="">
+          <Action content="MsgBob1 msgBob1" />
+          <Action content="msgBob1.nonce1=msgAlice1.nonce" />
+          <Action content="msgBob1.nonce2=nonceB" />
+          <Action content="msgBob1.k=pkb" />
+          <Action content="msgBob1=SymEnc(msgBob1,pka)" />
+          <Action content="send(msgBob1)" />
+        </Transition>
+        <State name="Bob_State_3" />
+        <Transition source="Bob_State_3" dest="Verify_State_2" guard="">
+          <Action content="MsgAlice2 ma2" />
+          <Action content="receive(ma2)" />
+          <Action content="MsgAlice2 msgAlice2=SymDec(ma2,skb)" />
+        </Transition>
+        <State name="Verify_State_2" />
+        <Transition source="Verify_State_2" dest="_final" guard="msgAlice2.nonce==nonceB" />
+      </StateMachine>
+    </ProcessToSM>
+  </ProcessToSMs>
+</Protocol>

@@ -1,0 +1,71 @@
+<Protocol name="协议1">
+  <ClassDiagram>
+    <UserType name="int" basic="true" />
+    <UserType name="bool" basic="true" />
+    <UserType name="number" basic="true" />
+    <UserType name="byte" basic="true" />
+    <UserType name="ByteVec" basic="middle" />
+    <UserType name="Timer" basic="middle" />
+    <UserType name="Msg" basic="false" parent="ByteVec">
+      <Attribute type="int" identifier="n" isArray="False" />
+      <Attribute type="number" identifier="m" isArray="False" />
+      <Method returnType="int" name="getN" cryptoSuffix="None">
+        <Parameter type="number" identifier="m" isArray="False" />
+      </Method>
+    </UserType>
+    <UserType name="Key" basic="false" parent="ByteVec">
+      <Attribute type="Msg" identifier="msg" isArray="False" />
+    </UserType>
+    <Process name="P1">
+      <Attribute type="Msg" identifier="msg" isArray="False" />
+      <Attribute type="Key" identifier="k" isArray="False" />
+      <Attribute type="int" identifier="a" isArray="True" />
+      <Method returnType="ByteVec" name="SymEnc" cryptoSuffix="AES">
+        <Parameter type="ByteVec" identifier="msg" isArray="False" />
+        <Parameter type="int" identifier="key" isArray="False" />
+      </Method>
+      <CommMethod name="send" inOutSuffix="In" commWay="NativeEthernetFrame">
+        <Parameter type="Msg" identifier="msg" isArray="False" />
+      </CommMethod>
+    </Process>
+    <Process name="P2" />
+  </ClassDiagram>
+  <ProcessToSMs>
+    <ProcessToSM process="P1">
+      <StateMachine refine_state="">
+        <Transition source="_init" dest="S2" >
+          <Guard content="(a+2==a+1) || (a+3==1)" />
+          <Action content="a=a" />
+        </Transition>
+        <State name="S2" />
+        <Transition source="S2" dest="S4">
+          <Guard content="!(a+2==0)" />
+          <Action content="a=2" />
+        </Transition>
+        <State name="S4" />
+        <Transition source="S4" dest="_final">
+          <Guard content="!(a&gt;5)" />
+          <Action content="a=3" />
+        </Transition>
+      </StateMachine>
+      <StateMachine refine_state="S4">
+        <Transition source="_init" dest="S5" />
+        <State name="S5" />
+        <Transition source="S5" dest="_final">
+          <Guard content="a&lt;2" />
+          <Action content="int b=2" />
+          <Action content="b=1" />
+          <Action content="SymEnc(send(b),a)" />
+          <Action content="a=1" />
+          <Action content="a=2" />
+        </Transition>
+      </StateMachine>
+    </ProcessToSM>
+    <ProcessToSM process="P2">
+      <StateMachine refine_state="顶层">
+        <Transition source="_init" dest="S3" />
+        <State name="S3" />
+      </StateMachine>
+    </ProcessToSM>
+  </ProcessToSMs>
+</Protocol>

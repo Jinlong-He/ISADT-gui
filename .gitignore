@@ -1,0 +1,6 @@
+*.o
+isadt
+Makefile
+build/
+.DS_Store/
+.vscode/
