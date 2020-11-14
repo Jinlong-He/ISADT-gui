@@ -15,16 +15,12 @@ namespace isadt {
     class Property {
     public:
         Property() {}
-
-        Attribute* getAttribute();
     };
 
     class SecurityProperty : public Property {
     public:
         SecurityProperty()
             : Property() {}
-
-        Attribute* getAttribute();
     };
 
     class SafetyProperty : public Property{
@@ -32,7 +28,16 @@ namespace isadt {
         SafetyProperty()
             : Property() {}
 
-        Attribute* getAttribute();
+        SafetyProperty(const string& str)
+            : Property(),
+              propertyStr_(str) {}
+
+        const string& getPropertyStr() const {
+            return propertyStr_;
+        }
+
+    private:
+        string propertyStr_;
     };
 
     class ConfidentialProperty : public SecurityProperty {
@@ -98,8 +103,8 @@ namespace isadt {
             : SecurityProperty(),
               value1_(nullptr),
               value2_(nullptr) {}
-        IntegratyProperty(Process* proc1, Vertex* vertex1, Attribute* attribute1,
-                          Process* proc2, Vertex* vertex2, Attribute* attribute2)
+        IntegratyProperty(Process* proc1, const string& vertex1, Attribute* attribute1,
+                          Process* proc2, const string& vertex2, Attribute* attribute2)
             : SecurityProperty(),
               value1_(new Value(proc1, vertex1, attribute1)),
               value2_(new Value(proc2, vertex2, attribute2)) {}
@@ -110,13 +115,13 @@ namespace isadt {
                 : proc_(nullptr),
                   vertex_(nullptr),
                   attribute_(nullptr) {}
-            Value(Process* proc, Vertex* vertex, Attribute* attribute)
+            Value(Process* proc, const string& vertex, Attribute* attribute)
                 : proc_(proc),
                   vertex_(vertex),
                   attribute_(attribute) {}
         private:
             Process* proc_;
-            Vertex* vertex_;
+            string vertex_;
             Attribute* attribute_;
         };
         Value* value1_;
@@ -127,28 +132,24 @@ namespace isadt {
     public:
         AvailabilityProperty()
             : SecurityProperty(),
-              value1_(nullptr),
-              value2_(nullptr) {}
-        AvailabilityProperty(Process* proc1, Vertex* vertex1,
-                             Process* proc2, Vertex* vertex2)
+              value_(nullptr) {}
+        AvailabilityProperty(Process* proc, const string& vertex) 
             : SecurityProperty(),
-              value1_(new Value(proc1, vertex1)),
-              value2_(new Value(proc2, vertex2)) {}
+              value_(new Value(proc, vertex)) {}
     private:
         struct Value {
         public:
             Value()
                 : proc_(nullptr),
-                    vertex_(nullptr) {}
-            Value(Process* proc, Vertex* vertex)
+                  vertex_(nullptr) {}
+            Value(Process* proc, const string& vertex)
                 : proc_(proc),
                   vertex_(vertex) {}
         private:
             Process* proc_;
-            Vertex* vertex_;
+            string vertex_;
         };
-        Value* value1_;
-        Value* value2_;
+        Value* value_;
     };
     
     class CTLProperty : public SafetyProperty{

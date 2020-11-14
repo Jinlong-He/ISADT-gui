@@ -59,8 +59,8 @@ namespace isadt{
     }
 
     IntegratyProperty* 
-    Model::mkIntegratyProperty(Process* process1, Vertex* vertex1, Attribute* attribute1,
-                               Process* process2, Vertex* vertex2, Attribute* attribute2){
+    Model::mkIntegratyProperty(Process* process1, const string& vertex1, Attribute* attribute1,
+                               Process* process2, const string& vertex2, Attribute* attribute2){
         IntegratyProperty* prop = new IntegratyProperty(process1, vertex1, attribute1,
                                                         process2, vertex2, attribute2);
         props_.push_back(prop);
@@ -68,10 +68,8 @@ namespace isadt{
     }
 
     AvailabilityProperty* 
-    Model::mkAvailabilityProperty(Process* process1, Vertex* vertex1,
-                                  Process* process2, Vertex* vertex2){
-        AvailabilityProperty* prop = new AvailabilityProperty(process1, vertex1,
-                                                              process2, vertex2);
+    Model::mkAvailabilityProperty(Process* process, const string& vertex) {
+        AvailabilityProperty* prop = new AvailabilityProperty(process, vertex);
         props_.push_back(prop);
         return prop;
     }

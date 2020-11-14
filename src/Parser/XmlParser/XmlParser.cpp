@@ -32,6 +32,12 @@ namespace isadt {
                     parseProcess(element, model);
                 } else if (strcmp(element -> Value(), "CommChannel") == 0) {
                     parseCommChannel(element, model);
+                } else if (strcmp(element -> Value(), "InitialKnowledge") == 0) {
+                    parseInitialKnowledge(element, model);
+                } else if (strcmp(element -> Value(), "SafetyProperty") == 0) {
+                    parseSafetyProperty(element, model);
+                } else if (strcmp(element -> Value(), "SecurityProperty") == 0) {
+                    parseSecurityProperty(element, model);
                 }
                 element = element -> NextSiblingElement();
             }
@@ -190,5 +196,87 @@ namespace isadt {
             }
         }
         return sm;
+    }
+
+    void XmlParser::parseInitialKnowledge(XMLElement* root, Model* model) {
+        if (!(root -> NoChildren())) {
+            auto element = root -> FirstChildElement();
+            while (element) {
+                if (strcmp(element -> Value(), "Knowledge") == 0) {
+                    parseK(element, model);
+                } else if (strcmp(element -> Value(), "KeyPair") == 0) {
+                    parseKP(element, model);
+                }
+                element = element -> NextSiblingElement();
+            }
+        }
+    }
+
+    void XmlParser::parseK(XMLElement* root, Model* model) {
+        auto proc = model -> getProcByName(root -> Attribute("process"));
+        model -> mkInitialKnowledge(proc, proc -> getAttributeByName(root -> Attribute("attribute")));
+    }
+
+    void XmlParser::parseKP(XMLElement* root, Model* model) {
+        auto proc1 = model -> getProcByName(root -> Attribute("pubProcess"));
+        auto proc2 = model -> getProcByName(root -> Attribute("secProcess"));
+        model -> mkInitialKnowledge(proc1, proc1 -> getAttributeByName(root -> Attribute("pubKey")),
+                                    proc2, proc2 -> getAttributeByName(root -> Attribute("secKey")));
+    }
+
+    void XmlParser::parseSafetyProperty(XMLElement* root, Model* model) {
+        if (!(root -> NoChildren())) {
+            auto element = root -> FirstChildElement();
+            while (element) {
+                if (strcmp(element -> Value(), "CTL") == 0) {
+                    parseCTL(element, model);
+                } else if (strcmp(element -> Value(), "Invariant") == 0) {
+                    parseInv(element, model);
+                }
+                element = element -> NextSiblingElement();
+            }
+        }
+    }
+
+    void XmlParser::parseCTL(XMLElement* root, Model* model) {
+        model -> mkSafetyProperty(root -> Attribute("formula"));
+    }
+
+    void XmlParser::parseInv(XMLElement* root, Model* model) {
+        model -> mkSafetyProperty(root -> Attribute("content"));
+    }
+
+    void XmlParser::parseSecurityProperty(XMLElement* root, Model* model) {
+        if (!(root -> NoChildren())) {
+            auto element = root -> FirstChildElement();
+            while (element) {
+                if (strcmp(element -> Value(), "Confidential") == 0) {
+                    parseConfidential(element, model);
+                } else if (strcmp(element -> Value(), "Authenticity") == 0) {
+                } else if (strcmp(element -> Value(), "Integrity") == 0) {
+                    parseIntegrity(element, model);
+                } else if (strcmp(element -> Value(), "Availability") == 0) {
+                    parseAvailability(element, model);
+                }
+                element = element -> NextSiblingElement();
+            }
+        }
+    }
+
+    void XmlParser::parseConfidential(XMLElement* root, Model* model) {
+        auto proc = model -> getProcByName(root -> Attribute("process"));
+        model -> mkConfidentialProperty(proc, proc -> getAttributeByName(root -> Attribute("attribute")));
+    }
+
+    void XmlParser::parseIntegrity(XMLElement* root, Model* model) {
+        auto proc1 = model -> getProcByName(root -> Attribute("processA"));
+        auto proc2 = model -> getProcByName(root -> Attribute("processB"));
+        model -> mkIntegratyProperty(proc1, root -> Attribute("stateA"), proc1 -> getAttributeByName(root -> Attribute("attributeA_Attr")),
+                                     proc2, root -> Attribute("stateB"), proc2 -> getAttributeByName(root -> Attribute("attributeBAttr")));
+    }
+
+    void XmlParser::parseAvailability(XMLElement* root, Model* model) {
+        auto proc = model -> getProcByName(root -> Attribute("process"));
+        model -> mkAvailabilityProperty(proc, root -> Attribute("state"));
     }
 }
