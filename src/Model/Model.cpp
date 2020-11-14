@@ -53,23 +53,43 @@ namespace isadt{
 
     ConfidentialProperty*
     Model::mkConfidentialProperty(Process* process, Attribute* attribute){
-        
+        ConfidentialProperty* prop = new ConfidentialProperty(process, attribute);
+        props_.push_back(prop);
+        return prop;
     }
+
     IntegratyProperty* 
     Model::mkIntegratyProperty(Process* process1, Vertex* vertex1, Attribute* attribute1,
                                Process* process2, Vertex* vertex2, Attribute* attribute2){
-
-                           }
+        IntegratyProperty* prop = new IntegratyProperty(process1, vertex1, attribute1,
+                                                        process2, vertex2, attribute2);
+        props_.push_back(prop);
+        return prop;
+    }
 
     AvailabilityProperty* 
     Model::mkAvailabilityProperty(Process* process1, Vertex* vertex1,
-                               Process* process2, Vertex* vertex2){
-
-                           }
+                                  Process* process2, Vertex* vertex2){
+        AvailabilityProperty* prop = new AvailabilityProperty(process1, vertex1,
+                                                              process2, vertex2);
+        props_.push_back(prop);
+        return prop;
+    }
 
     InitialKnowledge* 
     Model::mkInitialKnowledge(Process* process, Attribute* attribute){
+        InitialKnowledge* k = new InitialKnowledge(process, attribute);
+        initialKnowledges_.push_back(k);
+        return k;
+    }
 
+    InitialKnowledge* 
+    Model::mkInitialKnowledge(Process* process1, Attribute* attribute1,
+                              Process* process2, Attribute* attribute2) {
+        InitialKnowledge* k = new InitialKnowledge(process1, attribute1,
+                                                   process2, attribute2);
+        initialKnowledges_.push_back(k);
+        return k;
     }
     
     const vector<Process*>& Model::getProcesses() const{

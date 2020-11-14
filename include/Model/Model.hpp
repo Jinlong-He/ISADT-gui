@@ -81,6 +81,10 @@ namespace isadt {
 
         InitialKnowledge* 
         mkInitialKnowledge(Process* process, Attribute* attribute);
+
+        InitialKnowledge* 
+        mkInitialKnowledge(Process* process1, Attribute* attribute1,
+                          Process* process2, Attribute* attribute2);
         
         const vector<Process*>& getProcesses() const;
         const list<UserType*>& getUserTypes() const;

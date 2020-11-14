@@ -19,7 +19,7 @@ namespace isadt {
         Attribute* getAttribute();
     };
 
-    class SecurityProperty : Property {
+    class SecurityProperty : public Property {
     public:
         SecurityProperty()
             : Property() {}
@@ -27,7 +27,7 @@ namespace isadt {
         Attribute* getAttribute();
     };
 
-    class SafetyProperty : Property{
+    class SafetyProperty : public Property{
     public:
         SafetyProperty()
             : Property() {}
@@ -36,6 +36,7 @@ namespace isadt {
     };
 
     class ConfidentialProperty : public SecurityProperty {
+    public:
         ConfidentialProperty()
             : SecurityProperty(),
               proc_(nullptr),
@@ -52,6 +53,7 @@ namespace isadt {
     };
 
     class AuthenticityProperty : public SecurityProperty {
+    public:
         AuthenticityProperty()
             : SecurityProperty(),
               value1_(nullptr),
@@ -91,6 +93,7 @@ namespace isadt {
     };
 
     class IntegratyProperty : public SecurityProperty {
+    public:
         IntegratyProperty()
             : SecurityProperty(),
               value1_(nullptr),
@@ -120,12 +123,13 @@ namespace isadt {
         Value* value2_;
     };
 
-    class AvaisibilityProperty : public SecurityProperty {
-        AvaisibilityProperty()
+    class AvailabilityProperty : public SecurityProperty {
+    public:
+        AvailabilityProperty()
             : SecurityProperty(),
               value1_(nullptr),
               value2_(nullptr) {}
-        AvaisibilityProperty(Process* proc1, Vertex* vertex1,
+        AvailabilityProperty(Process* proc1, Vertex* vertex1,
                              Process* proc2, Vertex* vertex2)
             : SecurityProperty(),
               value1_(new Value(proc1, vertex1)),
@@ -148,6 +152,7 @@ namespace isadt {
     };
     
     class CTLProperty : public SafetyProperty{
+    public:
         CTLProperty()
             : SafetyProperty() {}
         CTLProperty(const string& ctlStr)
@@ -158,6 +163,7 @@ namespace isadt {
     };
 
     class InvariantProperty : public SafetyProperty{
+    public:
         InvariantProperty()
             : SafetyProperty() {}
         InvariantProperty(const string invariantStr)
