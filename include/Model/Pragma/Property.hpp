@@ -14,7 +14,7 @@ namespace isadt {
     class Process;
     class Property {
     public:
-        Property();
+        Property() {}
 
         Attribute* getAttribute();
     };
