@@ -68,16 +68,22 @@ namespace isadt {
         Process* mkProcess(const string& procName);
         Process* mkSystemProcess();
 
+        SafetyProperty*
+        mkSafetyProperty(const string& str) {
+            SafetyProperty* prop = new SafetyProperty(str);
+            props_.push_back(prop);
+            return prop;
+        }
+
         ConfidentialProperty*
         mkConfidentialProperty(Process* process, Attribute* attribute);
 
         IntegratyProperty* 
-        mkIntegratyProperty(Process* process1, Vertex* vertex1, Attribute* attribute1,
-                            Process* process2, Vertex* vertex2, Attribute* attribute2);
+        mkIntegratyProperty(Process* process1, const string& vertex1, Attribute* attribute1,
+                            Process* process2, const string& vertex2, Attribute* attribute2);
 
         AvailabilityProperty* 
-        mkAvailabilityProperty(Process* process1, Vertex* vertex1,
-                               Process* process2, Vertex* vertex2);
+        mkAvailabilityProperty(Process* process, const string& vertex);
 
         InitialKnowledge* 
         mkInitialKnowledge(Process* process, Attribute* attribute);
