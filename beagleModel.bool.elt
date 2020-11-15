@@ -1,80 +1,105 @@
 system
-    module Alice
-        bool data1;
-		bool data2;
-		bool data3;
-		bool data4;
-		bool data5;
-		bool data6;
-		bool data7;
-		bool data8;
-		bool data9;
-        bool m11;
-		bool m12;
-		bool m13;
-		bool m14;
-		bool m15;
-		bool m16;
-		bool m17;
-		bool m18;
-		bool m19;
-        label channel, msg1;
-        location INIT, makingMessage, sendingMessage, beforeFinish, error;
+	module P1
+		bool carry11;
+		bool carry12;
+		bool carry13;
+		bool carry14;
+		bool carry15;
+		bool carry16;
+		bool carry17;
+		bool carry18;
+		bool carry19;
 
-        init INIT;
-        from INIT to makingMessage do {
-        };
-        from makingMessage to sendingMessage do {
-        };
-        from sendingMessage to beforeFinish on msg1 do {
-        };
-    end
-    module Bob
-        bool data1;
-		bool data2;
-		bool data3;
-		bool data4;
-		bool data5;
-		bool data6;
-		bool data7;
-		bool data8;
-		bool data9;
-        bool m21;
-		bool m22;
-		bool m23;
-		bool m24;
-		bool m25;
-		bool m26;
-		bool m27;
-		bool m28;
-		bool m29;
-        bool secretData1;
-		bool secretData2;
-		bool secretData3;
-		bool secretData4;
-		bool secretData5;
-		bool secretData6;
-		bool secretData7;
-		bool secretData8;
-		bool secretData9;
-        label channel, msg1;
-        location INIT, waitingForMessage, messageDecrypt, messageDecrypted, secretDataReceived;
 
-        init INIT;
-        from INIT to waitingForMessage do {
-        };
-        from waitingForMessage to messageDecrypt do {
-        };
-        from messageDecrypt to messageDecrypted do {
-        };
-        from messageDecrypted to secretDataReceived on msg1 do {
-        };
-    end
-    //INVARSPEC (!(Bob.location == secretDataReceived) || !(Alice.location == beforeFinish) || ((Alice.location == beforeFinish) && (Bob.location == secretDataReceived)))
-    INVARSPEC (!(Alice.location == beforeFinish) || ((Alice.location == beforeFinish) && (Bob.location == secretDataReceived)))
+		bool a1;
+		bool a2;
+		bool a3;
+		bool a4;
+		bool a5;
+		bool a6;
+		bool a7;
+		bool a8;
+		bool a9;
+		bool b1;
+		bool b2;
+		bool b3;
+		bool b4;
+		bool b5;
+		bool b6;
+		bool b7;
+		bool b8;
+		bool b9;
+		bool alice1;
+		bool alice2;
+		bool alice3;
+		bool alice4;
+		bool alice5;
+		bool alice6;
+		bool alice7;
+		bool alice8;
+		bool alice9;
+		label channel;
+		location _init, _final, S2;
+
+		init _init do {
+		};
+		from S2 to _final do {
+			carry19 = alice9 && false;
+			alice9 = ((!alice9) && false) || (alice9 && (!false));
+			carry18 = (alice8 && true) || (alice8 && carry19) || (true && carry19);
+			alice8 = ((!alice8) && (!true) && carry19) || ((!alice8) && true && (!carry19)) || (alice8 && (!true) && (!carry19)) || (alice8 && true && carry19);
+			carry17 = (alice7 && false) || (alice7 && carry18) || (false && carry18);
+			alice7 = ((!alice7) && (!false) && carry18) || ((!alice7) && false && (!carry18)) || (alice7 && (!false) && (!carry18)) || (alice7 && false && carry18);
+			carry16 = (alice6 && true) || (alice6 && carry17) || (true && carry17);
+			alice6 = ((!alice6) && (!true) && carry17) || ((!alice6) && true && (!carry17)) || (alice6 && (!true) && (!carry17)) || (alice6 && true && carry17);
+			carry15 = (alice5 && false) || (alice5 && carry16) || (false && carry16);
+			alice5 = ((!alice5) && (!false) && carry16) || ((!alice5) && false && (!carry16)) || (alice5 && (!false) && (!carry16)) || (alice5 && false && carry16);
+			carry14 = (alice4 && false) || (alice4 && carry15) || (false && carry15);
+			alice4 = ((!alice4) && (!false) && carry15) || ((!alice4) && false && (!carry15)) || (alice4 && (!false) && (!carry15)) || (alice4 && false && carry15);
+			carry13 = (alice3 && false) || (alice3 && carry14) || (false && carry14);
+			alice3 = ((!alice3) && (!false) && carry14) || ((!alice3) && false && (!carry14)) || (alice3 && (!false) && (!carry14)) || (alice3 && false && carry14);
+			carry12 = (alice2 && false) || (alice2 && carry13) || (false && carry13);
+			alice2 = ((!alice2) && (!false) && carry13) || ((!alice2) && false && (!carry13)) || (alice2 && (!false) && (!carry13)) || (alice2 && false && carry13);
+			carry11 = (alice1 && false) || (alice1 && carry12) || (false && carry12);
+			alice1 = ((!alice1) && (!false) && carry12) || ((!alice1) && false && (!carry12)) || (alice1 && (!false) && (!carry12)) || (alice1 && false && carry12);
+
+		};
+		from _init to S2 do {
+		};
+	end
+
+	module P2
+		bool bob1;
+		bool bob2;
+		bool bob3;
+		bool bob4;
+		bool bob5;
+		bool bob6;
+		bool bob7;
+		bool bob8;
+		bool bob9;
+		label channel;
+		location _init, _final, S3;
+
+		init _init do {
+		};
+		from S3 to _final do {
+			bob1 = bob1;
+			bob2 = bob2;
+			bob3 = bob3;
+			bob4 = bob4;
+			bob5 = bob5;
+			bob6 = bob6;
+			bob7 = bob7;
+			bob8 = bob8;
+			bob9 = bob9;
+
+		};
+		from _init to S3 do {
+		};
+	end
+
+		INVARSPEC (!(P1.location == _final))
 end
-
-//INVARSPEC (!(Alice.location == beforeFinish) || ((Alice.location == beforeFinish) && (Bob.location == secretDataReceived)))
-
 
 

@@ -66,6 +66,9 @@
       <Confidential process="P1" attribute="alice" />
       <Availability process="P1" state="S2" />
     </SecurityProperty>
+    <SafetyProperty name="Sft1">
+      <CTL formula="P1.a=P1.b" />
+    </SafetyProperty>
   </ClassDiagram>
   <ProcessToSMs>
     <ProcessToSM process="P1">

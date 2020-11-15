@@ -1,38 +1,33 @@
 system
-    module Alice
-        int[0:256] data;
-        int[0:256] m1;
-        label channel, msg1;
-        location INIT, makingMessage, sendingMessage, beforeFinish, error;
+	module P1
+		int[0:256] a;
+		int[0:256] b;
+		int[0:256] alice;
+		label channel;
+		location _init, _final, S2;
 
-        init INIT;
-        from INIT to makingMessage do {
-        };
-        from makingMessage to sendingMessage do {
-        };
-        from sendingMessage to beforeFinish on msg1 do {
-        };
-    end
-    module Bob
-        int[0:256] data;
-        int[0:256] m2;
-        int[0:256] secretData;
-        label channel, msg1;
-        location INIT, waitingForMessage, messageDecrypt, messageDecrypted, secretDataReceived;
+		init _init do {
+		};
+		from S2 to _final do {
+			alice = alice + 10;
+		};
+		from _init to S2 do {
+		};
+	end
 
-        init INIT;
-        from INIT to waitingForMessage do {
-        };
-        from waitingForMessage to messageDecrypt do {
-        };
-        from messageDecrypt to messageDecrypted do {
-        };
-        from messageDecrypted to secretDataReceived on msg1 do {
-        };
-    end
-    //INVARSPEC (!(Bob.location == secretDataReceived) || !(Alice.location == beforeFinish) || ((Alice.location == beforeFinish) && (Bob.location == secretDataReceived)))
-    INVARSPEC (!(Alice.location == beforeFinish) || ((Alice.location == beforeFinish) && (Bob.location == secretDataReceived)))
+	module P2
+		int[0:256] bob;
+		label channel;
+		location _init, _final, S3;
+
+		init _init do {
+		};
+		from S3 to _final do {
+			bob = bob;
+		};
+		from _init to S3 do {
+		};
+	end
+
+		INVARSPEC (!(P1.location == _final))
 end
-
-//INVARSPEC (!(Alice.location == beforeFinish) || ((Alice.location == beforeFinish) && (Bob.location == secretDataReceived)))
-

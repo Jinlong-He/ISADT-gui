@@ -179,6 +179,7 @@ namespace isadt {
             : SafetyProperty(),
               ctlStr_(ctlStr) {}
         PropertyType getPropertyType() const { return CTL; }
+        string getCtlStr() { return this->ctlStr_; }
         private:
             string ctlStr_;
     };
@@ -191,6 +192,7 @@ namespace isadt {
             : SafetyProperty(),
               invariantStr_(invariantStr) {}
         PropertyType getPropertyType() const { return INVARIANT; }
+        string getInvariantStr() { return this->invariantStr_; }
         private:
             string invariantStr_;
     };
