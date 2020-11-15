@@ -4,6 +4,7 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_CXX
+  "/home/wqy/文档/integrate/ISDAT-gui/src/Verifier/BeagleTranslator.cpp" "/home/wqy/文档/integrate/ISDAT-gui/cmake-build-debug/src/CMakeFiles/isadt.dir/Verifier/BeagleTranslator.cpp.o"
   "/home/wqy/文档/integrate/ISDAT-gui/src/Verifier/ProverifTranslator.cpp" "/home/wqy/文档/integrate/ISDAT-gui/cmake-build-debug/src/CMakeFiles/isadt.dir/Verifier/ProverifTranslator.cpp.o"
   "/home/wqy/文档/integrate/ISDAT-gui/src/Verifier/mkInitialKnowledge.cpp" "/home/wqy/文档/integrate/ISDAT-gui/cmake-build-debug/src/CMakeFiles/isadt.dir/Verifier/mkInitialKnowledge.cpp.o"
   "/home/wqy/文档/integrate/ISDAT-gui/src/Verifier/mkProcess.cpp" "/home/wqy/文档/integrate/ISDAT-gui/cmake-build-debug/src/CMakeFiles/isadt.dir/Verifier/mkProcess.cpp.o"

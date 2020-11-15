@@ -1,7 +1,3 @@
-//
-// Created by wqy on 2020/11/12.
-//
-
 #ifndef ISADT_PROVERIFTRANSLATOR_HPP
 #define ISADT_PROVERIFTRANSLATOR_HPP
 

@@ -1,5 +1,6 @@
 #include <iostream>
 #include <list>
+#include <Verifier/BeagleTranslator.hpp>
 #include "../include/Model/Model.hpp"
 #include "../include/Parser/XmlParser/XmlParser.hpp"
 #include "../include/Parser/LParser/LParser.hpp"
@@ -137,7 +138,10 @@ int main(int argc, char *argv[]) {
                 auto proc = model.getProcesses().front();
                 auto sm = proc -> getStateMachines().front();
                 auto bsm = proc -> mkBeagleStateMachine(sm);
-                bsm -> print();
+                BeagleTranslator* beagleTranslator = new BeagleTranslator();
+                beagleTranslator->beagleTranslate(&model);
+                system("./beagle -bmc beagleModel.elt");
+                //bsm -> print();
             } else {
                 //this is an example for make a statemahine for beagle.
                 model.mkCommProductStateMahine();

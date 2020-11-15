@@ -1,0 +1,80 @@
+system
+    module Alice
+        bool data1;
+		bool data2;
+		bool data3;
+		bool data4;
+		bool data5;
+		bool data6;
+		bool data7;
+		bool data8;
+		bool data9;
+        bool m11;
+		bool m12;
+		bool m13;
+		bool m14;
+		bool m15;
+		bool m16;
+		bool m17;
+		bool m18;
+		bool m19;
+        label channel, msg1;
+        location INIT, makingMessage, sendingMessage, beforeFinish, error;
+
+        init INIT;
+        from INIT to makingMessage do {
+        };
+        from makingMessage to sendingMessage do {
+        };
+        from sendingMessage to beforeFinish on msg1 do {
+        };
+    end
+    module Bob
+        bool data1;
+		bool data2;
+		bool data3;
+		bool data4;
+		bool data5;
+		bool data6;
+		bool data7;
+		bool data8;
+		bool data9;
+        bool m21;
+		bool m22;
+		bool m23;
+		bool m24;
+		bool m25;
+		bool m26;
+		bool m27;
+		bool m28;
+		bool m29;
+        bool secretData1;
+		bool secretData2;
+		bool secretData3;
+		bool secretData4;
+		bool secretData5;
+		bool secretData6;
+		bool secretData7;
+		bool secretData8;
+		bool secretData9;
+        label channel, msg1;
+        location INIT, waitingForMessage, messageDecrypt, messageDecrypted, secretDataReceived;
+
+        init INIT;
+        from INIT to waitingForMessage do {
+        };
+        from waitingForMessage to messageDecrypt do {
+        };
+        from messageDecrypt to messageDecrypted do {
+        };
+        from messageDecrypted to secretDataReceived on msg1 do {
+        };
+    end
+    //INVARSPEC (!(Bob.location == secretDataReceived) || !(Alice.location == beforeFinish) || ((Alice.location == beforeFinish) && (Bob.location == secretDataReceived)))
+    INVARSPEC (!(Alice.location == beforeFinish) || ((Alice.location == beforeFinish) && (Bob.location == secretDataReceived)))
+end
+
+//INVARSPEC (!(Alice.location == beforeFinish) || ((Alice.location == beforeFinish) && (Bob.location == secretDataReceived)))
+
+
+

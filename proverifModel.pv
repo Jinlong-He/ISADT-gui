@@ -42,6 +42,7 @@ event P2__final().
 event P2_S3().
 event P1_S2().
 query secret alice.
+query event(P1_S2()) ==> event(P1__init()).
 let P1()=
 	new a: ByteVec;
 	new b: ByteVec;

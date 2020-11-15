@@ -62,6 +62,10 @@
         <Parameter type="ByteVec" identifier="pkey" isArray="False" />
       </Method>
     </Process>
+    <SecurityProperty name="Scr1">
+      <Confidential process="P1" attribute="alice" />
+      <Availability process="P1" state="S2" />
+    </SecurityProperty>
   </ClassDiagram>
   <ProcessToSMs>
     <ProcessToSM process="P1">

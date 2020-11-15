@@ -83,7 +83,7 @@ namespace isadt {
         // Add queries in proverif file
         for (auto property : model->getProps())
         {
-            std::cout << ((ConfidentialProperty*)property)->getAttribute()->getIdentifier() << std::endl;
+            //std::cout << ((ConfidentialProperty*)property)->getAttribute()->getIdentifier() << std::endl;
             switch(property->getPropertyType()) {
                 case CONFIDENTIAL: {
                     string queryParam = ((ConfidentialProperty *) property)->getAttribute()->getIdentifier();
@@ -100,7 +100,7 @@ namespace isadt {
                 case AVAILABILITY: {
                     auto availabilityProperty = ((AvailabilityProperty*) property);
                     string queryParam1 = availabilityProperty->getValueProc()->getName()+"_"+availabilityProperty->getValueVertex();
-                    string queryParam2 = availabilityProperty->getValueProc()->getName()+"__Init";
+                    string queryParam2 = availabilityProperty->getValueProc()->getName()+"__init";
                     out << "query event(" << queryParam1 << "()) ==> event(" << queryParam2 << "()).\n";
                     break;
                 }

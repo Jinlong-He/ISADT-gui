@@ -254,6 +254,9 @@
 				</MakeCommands>
 			</Target>
 		</Build>
+		<Unit filename="/home/wqy/文档/integrate/ISDAT-gui/include/Verifier/BeagleTranslator.hpp">
+			<Option target="isadt"/>
+		</Unit>
 		<Unit filename="/home/wqy/文档/integrate/ISDAT-gui/include/Verifier/ProverifTranslator.hpp">
 			<Option target="isadt"/>
 		</Unit>
@@ -1258,6 +1261,9 @@
 		</Unit>
 		<Unit filename="/home/wqy/文档/integrate/ISDAT-gui/src/Parser/XmlParser/tinyxml2.cpp">
 			<Option target="Parser"/>
+		</Unit>
+		<Unit filename="/home/wqy/文档/integrate/ISDAT-gui/src/Verifier/BeagleTranslator.cpp">
+			<Option target="isadt"/>
 		</Unit>
 		<Unit filename="/home/wqy/文档/integrate/ISDAT-gui/src/Verifier/ProverifTranslator.cpp">
 			<Option target="isadt"/>
