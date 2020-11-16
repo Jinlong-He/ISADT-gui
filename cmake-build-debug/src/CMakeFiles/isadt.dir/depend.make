@@ -178,6 +178,7 @@ src/CMakeFiles/isadt.dir/main.cpp.o: ../include/Model/Struct/Class.hpp
 src/CMakeFiles/isadt.dir/main.cpp.o: ../include/Model/Struct/Struct.hpp
 src/CMakeFiles/isadt.dir/main.cpp.o: ../include/Model/Type/UserType.hpp
 src/CMakeFiles/isadt.dir/main.cpp.o: ../include/Verifier/BeagleTranslator.hpp
+src/CMakeFiles/isadt.dir/main.cpp.o: ../include/Verifier/ProverifTranslator.hpp
 src/CMakeFiles/isadt.dir/main.cpp.o: ../src/Parser/LParser/generated/tinycBaseListener.h
 src/CMakeFiles/isadt.dir/main.cpp.o: ../src/Parser/LParser/generated/tinycBaseVisitor.h
 src/CMakeFiles/isadt.dir/main.cpp.o: ../src/Parser/LParser/generated/tinycLexer.h
@@ -365,6 +366,5 @@ src/CMakeFiles/isadt.dir/main.cpp.o: ../include/Parser/ArgParser/argparse.hpp
 src/CMakeFiles/isadt.dir/main.cpp.o: ../include/Parser/LParser/LParser.hpp
 src/CMakeFiles/isadt.dir/main.cpp.o: ../include/Parser/XmlParser/XmlParser.hpp
 src/CMakeFiles/isadt.dir/main.cpp.o: ../include/Parser/XmlParser/tinyxml2.h
-src/CMakeFiles/isadt.dir/main.cpp.o: ../include/Verifier/ProverifTranslator.hpp
 src/CMakeFiles/isadt.dir/main.cpp.o: ../src/main.cpp
 

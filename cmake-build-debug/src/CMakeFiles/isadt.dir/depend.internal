@@ -179,6 +179,7 @@ src/CMakeFiles/isadt.dir/main.cpp.o
  ../include/Model/Struct/Struct.hpp
  ../include/Model/Type/UserType.hpp
  ../include/Verifier/BeagleTranslator.hpp
+ ../include/Verifier/ProverifTranslator.hpp
  ../src/Parser/LParser/generated/tinycBaseListener.h
  ../src/Parser/LParser/generated/tinycBaseVisitor.h
  ../src/Parser/LParser/generated/tinycLexer.h
@@ -366,5 +367,4 @@ src/CMakeFiles/isadt.dir/main.cpp.o
  /home/wqy/文档/integrate/ISDAT-gui/include/Parser/LParser/LParser.hpp
  /home/wqy/文档/integrate/ISDAT-gui/include/Parser/XmlParser/XmlParser.hpp
  /home/wqy/文档/integrate/ISDAT-gui/include/Parser/XmlParser/tinyxml2.h
- /home/wqy/文档/integrate/ISDAT-gui/include/Verifier/ProverifTranslator.hpp
  /home/wqy/文档/integrate/ISDAT-gui/src/main.cpp
