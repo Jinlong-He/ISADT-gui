@@ -125,8 +125,8 @@ int main(int argc, char *argv[]) {
             if (program["-engine=proverif"] == true) {
                 //auto proc = model.getProcesses().front();
                 //auto sm = proc->getStateMachines().front();
-                //ProverifTranslator proverifTranslator(&model);
-                //proverifTranslator.translate();
+                ProverifTranslator proverifTranslator(&model);
+                proverifTranslator.translate();
                 //system("./proverif proverifModel.pv");
             } else if (program["-engine=beagle"] == true) {
                 //this is an example for make a statemahine for beagle.
