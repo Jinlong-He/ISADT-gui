@@ -1,7 +1,7 @@
 #include "Verifier/ProverifTranslator.hpp"
 using std::cout, std::endl;
 namespace isadt {
-    void getMessage(const list<Action*>& actions, unordered_map<Attribute*, vector<Term*>>& map) {
+    void getMessage(const list<Action*>& actions, unordered_map<string, vector<Term*>>& map) {
         for (auto action : actions) {
             if (action -> isAssignmentAction()) {
                 if (action -> getLhs() -> getTermType() == AT) {
@@ -11,12 +11,12 @@ namespace isadt {
                     if (type -> getAttributes().size() == 0) {
                         continue;
                     }
-                    if (map.count(attr) == 0) {
-                        map[attr].resize(type -> getAttributes().size());
+                    if (map.count(attr -> getIdentifier()) == 0) {
+                        map[attr -> getIdentifier()].resize(type -> getAttributes().size());
                     }
                     auto childTerm = at -> getChildren().front();
                     auto child = ((AttributeTerm*)((Expression*)childTerm) -> getTerm1()) -> getAttribute();
-                    map.at(attr)[type -> getID(child -> getIdentifier())] = action -> getRhs();
+                    map.at(attr -> getIdentifier())[type -> getID(child -> getIdentifier())] = action -> getRhs();
                 }
             }
         }
@@ -31,13 +31,27 @@ namespace isadt {
             const auto& actions = edge -> getActions();
             for (auto action : actions) {
                 if (action -> isAssignmentAction()) {
-                    if (!action -> getRhs()) break;
+                    if (!action -> getRhs() && action -> getLhs() -> getTermType() == MT) {
+                        auto methodTerm = ((MethodTerm*)action -> getLhs());
+                        auto method = methodTerm -> getMethod();
+                        if (method -> isCommMethod()) {
+                        } else {
+                            if (method -> getName() == "Sign") {
+                                for (auto attrTerm : methodTerm -> getArgs()) {
+                                    if (attrTerm -> getTermType() == AT) {
+                                        const auto& attrStr = ((AttributeTerm*)attrTerm) -> getAttribute() -> getIdentifier();
+                                    }
+                                }
+                            } else if (method -> getName() == "Verify") {
+                            }
+                        }
+                    }
                     messageActions.push_back(action);
                 }
             }
             unordered_map<Attribute*, vector<Term*> > map;
             unordered_map<Attribute*, string> strMap;
-            getMessage(messageActions, map);
+            //getMessage(messageActions, map);
             for (auto&[attr, vec] : map) {
                 auto& str = strMap[attr];
                 str = "(";
@@ -66,6 +80,7 @@ namespace isadt {
             vertex = edge -> getToVertex();
         }
     }
+
     void ProverifTranslator::translate() {
         for (auto p : model_ -> getProcesses()) {
             translateProcess(p);
