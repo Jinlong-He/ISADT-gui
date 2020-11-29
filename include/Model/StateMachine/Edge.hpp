@@ -105,6 +105,9 @@ namespace isadt {
     	bool hasActions();
     	void removeAllActions();
     	void removeFirstAction();
+        bool isGuardNull() const {
+            return (guard_ == nullptr) || (guard_ -> getExpression() == nullptr);
+        }
 	private:
     	Vertex* from_;               //< from Vertex
     	Vertex* to_;                 //< to Vertex

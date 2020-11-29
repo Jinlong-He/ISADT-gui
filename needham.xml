@@ -30,6 +30,7 @@
       <Attribute type="pk" identifier="pka" isArray="False" />
       <Attribute type="pk" identifier="pkb" isArray="False" />
       <Attribute type="sk" identifier="ska" isArray="False" />
+      <Attribute type="MsgAlice1" identifier="msgAlice1" isArray="False" />
       <Method returnType="ByteVec" name="SymEnc" cryptoSuffix="AES" achieve="">
         <Parameter type="ByteVec" identifier="msg" isArray="False" />
         <Parameter type="ByteVec" identifier="key" isArray="False" />
@@ -86,26 +87,16 @@
         <Transition source="_init" dest="Alice_State_1" />
         <State name="Alice_State_1" />
         <Transition source="Alice_State_1" dest="Alice_State_2" guard="">
-          <Action content="MsgAlice1 msgAlice1" />
           <Action content="msgAlice1.nonce=nonce" />
           <Action content="msgAlice1.id=alice" />
-          <Action content="msgAlice1=SymEnc(msgAlice1,pkb)" />
-          <Action content="send(msgAlice1)" />
         </Transition>
         <State name="Alice_State_2" />
         <Transition source="Alice_State_2" dest="Verify_State" guard="">
-          <Action content="ByteVec bv" />
-          <Action content="receive(bv)" />
-          <Action content="MsgBob1 msgBob1 = SymDec(bv,ska)" />
         </Transition>
         <State name="Verify_State" />
-        <Transition source="Verify_State" dest="Alice_State_3" guard="msgBob1.nonce1 == nonce" />
+        <Transition source="Verify_State" dest="Alice_State_3" guard="" />
         <State name="Alice_State_3" />
         <Transition source="Alice_State_3" dest="_final" guard="">
-          <Action content="MsgAlice2 msgAlice2" />
-          <Action content="msgAlice2.nonce=msgBob1.nonce2" />
-          <Action content="ByteVec bv2=SymEnc(msgAlice2,pkb)" />
-          <Action content="send(bv2)" />
         </Transition>
       </StateMachine>
     </ProcessToSM>
@@ -114,26 +105,15 @@
         <Transition source="_init" dest="Bob_State_1" />
         <State name="Bob_State_1" />
         <Transition source="Bob_State_1" dest="Bob_State_2" guard="">
-          <Action content="ByteVec ma1" />
-          <Action content="receive(ma1)" />
-          <Action content="MsgAlice1 msgAlice1=SymDec(ma1,skb)" />
         </Transition>
         <State name="Bob_State_2" />
         <Transition source="Bob_State_2" dest="Bob_State_3" guard="">
-          <Action content="MsgBob1 msgBob1" />
-          <Action content="msgBob1.nonce1=msgAlice1.nonce" />
-          <Action content="msgBob1.nonce2=nonce" />
-          <Action content="ByteVec mb1=SymEnc(msgBob1,pka)" />
-          <Action content="send(mb1)" />
         </Transition>
         <State name="Bob_State_3" />
         <Transition source="Bob_State_3" dest="Verify_State2" guard="">
-          <Action content="ByteVec ma2" />
-          <Action content="receive(ma2)" />
-          <Action content="MsgAlice2 msgAlice2=SymDec(ma2,skb)" />
         </Transition>
         <State name="Verify_State2" />
-        <Transition source="Verify_State2" dest="_final" guard="msgAlice2.nonce == nonce " />
+        <Transition source="Verify_State2" dest="_final" guard="" />
       </StateMachine>
     </ProcessToSM>
   </ProcessToSMs>
