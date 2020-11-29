@@ -132,7 +132,7 @@ namespace isadt {
         }
         if (base == "Message") {
             userType -> setMsgType(root -> Attribute("msgType"));
-            userType -> setSigLen(root -> Attribute("sigLen"));
+            userType -> setSigLen(root -> Attribute("signLen"));
         }
         if (!(root -> NoChildren())) {
             auto element = root -> FirstChildElement();
