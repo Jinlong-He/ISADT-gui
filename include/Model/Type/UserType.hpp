@@ -14,12 +14,14 @@ namespace isadt {
     class UserType : public Class {
     public:
         UserType()
-            : Class() {}
+            : Class(),
+              sigLen_(0) {}
 
         UserType(const string& name, 
                  UserType* base = nullptr)
             : Class(name),
-              base_(base) {}
+              base_(base),
+              sigLen_(0) {}
 
         ~UserType() {}
 
