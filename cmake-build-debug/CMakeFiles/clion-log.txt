@@ -1,9 +1,0 @@
-/home/wqy/文档/clion-2020.1.1/bin/cmake/linux/bin/cmake -DCMAKE_BUILD_TYPE=Debug -G "CodeBlocks - Unix Makefiles" /home/wqy/文档/integrate/ISDAT-gui
--- root This is SOURCE dir /home/wqy/文档/integrate/ISDAT-gui
--- src This is SOURCE dir /home/wqy/文档/integrate/ISDAT-gui
--- Model This is SOURCE dir /home/wqy/文档/integrate/ISDAT-gui
--- Parser This is SOURCE dir /home/wqy/文档/integrate/ISDAT-gui
--- CodeGenerator This is SOURCE dir /home/wqy/文档/integrate/ISDAT-gui
--- Configuring done
--- Generating done
--- Build files have been written to: /home/wqy/文档/integrate/ISDAT-gui/cmake-build-debug

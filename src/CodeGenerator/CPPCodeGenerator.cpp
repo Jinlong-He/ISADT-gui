@@ -130,7 +130,7 @@ namespace isadt{
         std::string  CPPCodeGenerator::generateCommonIncludes()
         {
             std::string commonIncludes =
-			"#include <iostream>\n#include <string>\n#include <vector>\n#include <stdlib.h>\n#include <thread>\n#include <stdlib.h>\n#include <sstream>\n";
+			"#include <iostream>\n#include <string>\n#include <vector>\n#include <stdlib.h>\n#include <thread>\n#include <stdlib.h>\n#include <sstream>\n#include <arpa/inet.h>\n";
 		    commonIncludes += INCLUDE_HEADER;
 		    commonIncludes += SERIALIZATION_INCLUDE;
 			return commonIncludes;
@@ -287,260 +287,131 @@ namespace isadt{
 			return srcIncludeStr;
 		}
 
+        std::string generateAttrs(const list<Attribute*>& attrs)
+        {
+            std::string attrStr = "(";
+            int i = 1;
+            for (Attribute* a : attrs) {
+                attrStr += a->getType()->getName() + " "
+                             + a->getIdentifier();
+                if (i < attrs.size()) {
+                    attrStr += ", ";
+                }
+                i++;
+            }
+            attrStr += ")";
+            return attrStr;
+        }
+
+        std::string generateMethodSignature(const std::string& rttStr, const std::string& nameSpace,
+                                            const std::string& methodName, const list<Attribute*>& attrs)
+        {
+            if (nameSpace == "") {
+                return rttStr + " " + methodName + generateAttrs(attrs);
+            }
+            return  rttStr + " " + nameSpace + "::" + methodName + generateAttrs(attrs);
+        }
+
         std::string  CPPCodeGenerator::generateSrcMethods(Process* proc)
 		{		
 			std::string outStr = "";
-			/*code generation for base methods*/
+            std::unordered_set<std::string> keyMethods {"Sign", "Verify",
+                                                        "SymEnc", "SymDec",
+                                                        "AsymEnc", "AsymDec"};
+            std::unordered_set<std::string> filterMethods {"htonl", "ntohl",
+                                                        "ntohs", "htons"};
+
+			/*code generation for base methods*/ 
 			std::cout << "generate Methods" << std::endl;
+            
 			for (Method* m : proc->getMethods())
 			{
-				if(!m->getAlgorithmId().compare(""))
-				{
-					std::string rttStr =  m->getReturnType()->getName();
-					std::string classNamespace = proc->getName() + "::";
-					std::string methodName = m->getName();
-					std::string attrStr = "(";
-					int i = 1;
-					for (Attribute* a : m->getAttributes()) 
-					{
-						std::string termStr = a->getType()->getName() + " " + a->getIdentifier();
-						attrStr += termStr;
-						if (i < m->getAttributes().size()) 
-						{
-							attrStr += ", ";
-						}
-						i++;
-					}
-					attrStr += ")";
-					std::string methodDef = rttStr + " " + classNamespace + methodName + attrStr;
+                if (keyMethods.find(m->getName()) != keyMethods.end()) {
+                    // Key Methods
+                    // m->getAlgorithmId(): None -> IBE
+                    // Sign, Verfiy
+                    
+                    // SymEnc, SymDec
+                    // AsymEnc, AsymDec
+
+                    std::cout << "Key Method: " << m->getName() << std::endl;
+                    std::string rttStr =  m->getReturnType()->getName();
+                    std::string methodSig = generateMethodSignature(rttStr, proc->getName(),
+                                                                m->getName(), m->getAttributes());
+					std::string returnVal = "\t" + rttStr + " result;" + CR;
+                    // sign(const char* msg, size_t msgLen, const char* sig, size_t sigLen, const string& id)
+                    auto& alId = m->getAlgorithmId();
+
+                    auto attrsIt = m->getAttributes().cbegin();
+                    auto msgId = (*attrsIt)->getIdentifier();
+                    attrsIt++;
+                    auto keyId = (*attrsIt)->getIdentifier();
+                    
+                    std::string algId = alId == "None" ? "IBE" : alId;
+                    // sign((char*)msg, msg.getLen(), msg.getSig(), msg.getSigLen(), (char*)key, "IBE");
+                    std::string callAdaptor = "\tresult = " + m->getName() + "((char*)" + msgId + ", " +
+                        msgId + ".getLen(), " +
+                        msgId + ".getSig(), " +
+                        msgId + ".getSigLend(), " +
+                        "(char*)" + keyId + ", \"" +
+                        algId + "\");\n";
+					std::string ret = "\treturn result;\n";
+					std::string methodBody = "{\n" + returnVal + callAdaptor + ret + "\n}\n";
+					outStr += (methodSig + methodBody);
+                } else {
+                    if (filterMethods.find(m->getName()) != filterMethods.end()) {
+                        continue;
+                    }
+                    // Simple Methods
+                    std::string rttStr =  m->getReturnType()->getName();
+					std::string methodSig = generateMethodSignature(rttStr, proc->getName(),
+                                                                m->getName(), m->getAttributes());
 					std::string returnVal = "\t" + rttStr + " result;" + CR;
 					std::string ret = "\treturn result;\n";
 					std::string methodBody = "{\n" + returnVal + ret + "\n}\n";
-					outStr += (methodDef + methodBody);
-				}
+					outStr += (methodSig + methodBody);
+                }
 			}
 			std::cout << "generate Methods Over" << std::endl;
+
 			/*code generation for communication methods*/
 			std::cout << "generate Communication Methods" << std::endl;
 			for (CommMethod* m : proc->getCommMethods()){
 				std::string commStr = "";
 				std::string commHandlerStr = "";
-				//std::string rttStr = m->getReturnType()->getName();
-				if(!m->getCommId().compare("NativeEthernetFrame") && !m->getInOut()){
-					//generate the handler
-					commHandlerStr += "static void dataHandler" + proc->getName() + m->getName() + "(u_char* param, const struct pcap_pkthdr* header, const u_char* packetData){\n";
-					commHandlerStr += "\tether_header* eh;\n";
-					commHandlerStr += "\teh = (ether_header*)packetData;\n";
-					commHandlerStr += "\t/*Configure your own protocol number of ethernet frame*/\n";
-					commHandlerStr += "\tif(ntohs(eh->type) == 0x888f){\n";
-					commHandlerStr += "\t\t/*Add your own packet handling logic, tempData is used to store the packet after breaking the listening loop*/\n";
-					commHandlerStr += "\t\ttempData" + proc->getName() + " = NULL;\n";
-					commHandlerStr += "\t\tint breakingLoopCondition = 1;\n";
-					commHandlerStr += "\t\tif(breakingLoopCondition){\n";
-					commHandlerStr += "\t\t\tpcap_breakloop(dev" + proc->getName() + ");\n";
-					commHandlerStr += "\t\t}\n";
-					commHandlerStr += "\t}\n";
-					commHandlerStr += "}\n";
-				}
-				
+                commStr += "\t// commID: " + m->getCommId() + CR;
+                // commID: NativeEthernetFrame, UDP
+                // Generate Handler?
+
+				// Method Head
 				std::string rttStr = "int";
-				std::string classNamespace = proc->getName() + "::";
-				std::string methodName = m->getName();
-				std::string attrStr = "(";
-				int i = 1;
-				for (Attribute* a : m->getAttributes()) 
-				{
-					std::string termStr = a->getType()->getName() + " " + a->getIdentifier();
-					attrStr += termStr;
-					if (i < m->getAttributes().size()) 
-					{
-						attrStr += ", ";
-					}
-					i++;
-				}
-				attrStr += ")";
-				std::string methodDef = rttStr + " " + classNamespace + methodName + attrStr;
+                std::string methodSig = generateMethodSignature(rttStr, proc->getName(),
+                                                                m->getName(), m->getAttributes());
 				std::string returnVal = '\t' + rttStr + " result;" + CR;
-				std::string ret = "\treturn result;\n";
+				std::string ret = "\treturn result;";
 				
 				std::string methodBody = "";
 				if(!m->getCommId().compare("NativeEthernetFrame")){
 					if(!m->getInOut()){
-						//IN
-						commStr += "\t/*Configure your own implementation of length_, default set to 1000*/\n";
-						commStr += "\tint length_ = 1000;\n";
-						commStr += "\tu_char* data_ = (u_char*)malloc(length_*sizeof(u_char));\n"; 	
-						commStr += "\t/*Add MAC Address here*/\n";
-						commStr += "\tu_char mac[6];\n";
-						commStr += "\tEtherReceiver er;\n";
-						commStr += "\tpcap_if_t* dev = er.getDevice();\n";
-						commStr += "\tchar errbuf[500];\n";
-						commStr += "\tpcap_t* selectedAdp = pcap_open_live(dev->name, 65536, 1, 1000, errbuf);\n";
-						commStr += "\tdev" + proc->getName() + " = selectedAdp;\n";
-						commStr += "\t/*Add self defined dataHandler to handle data received*/\n";
-						commStr += "\t/*parameters: u_char* param, const struct pcap_pkthdr* header, const u_char* packetData*/\n";
-						commStr += "\ter.listenWithHandler(dev" + proc->getName() + ", dataHandler" + proc->getName() + m->getName() +  ", data_);\n";
-						commStr += "\t/*Add your own data processing logic here*/\n";
-						commStr += "\tfree(data_);\n";
-
+						// IN
 					} else {
-						//OUT
-						commStr += "\tint length_ = tempData" + proc->getName() + "Str.size();\n";
-						commStr += "\tu_char* data_ = (u_char*)malloc(length_*sizeof(u_char));\n"; 	
-						commStr += "\t/*Add MAC Address here*/\n";
-						commStr += "\tu_char mac[6];\n";
-						commStr += "\tEtherSender snd(mac);\n";
-						commStr += "\tsnd.getDevice();\n";
-						commStr += "\t/*add your identifier of the sender*/\n";
-						commStr += "\tint success =snd.sendEtherBroadcast(data_, length_);\n";
+						// OUT
 					}
-					
 					methodBody = "{\n" + commStr + returnVal + ret + "\n}\n";
 				} else if(!m->getCommId().compare("UDP")){
 					if(!m->getInOut()){
-						//IN
-						commStr += "\t/*Add IP Str and portNUm here*/\n";
-						commStr += "\tstd::string IPStr_ = \"255.255.255.255\";\n";
-						commStr += "\tu_short portNum_ = 6666;\n";
-						commStr += "\tUDPReceiver  er;\n";
-						commStr += "\t/*allocation for destination here*/\n";
-						commStr += "\tif(tempData"+ proc->getName() + " != NULL){\n";
-						commStr += "\t\tfree(tempData" + proc->getName() + ");\n";
-						commStr += "\t}\n";
-						commStr += "\t/*Configure your own implementation of length_, default set to 1000*/\n";
-						commStr += "\ttempData" + proc->getName() + " = (char*)malloc(1000*sizeof(char));\n";
-						commStr += "\tint result = er.receivePacket((u_char*)tempData" + proc->getName() + ", IPStr_, portNum_);\n";
-						commStr += "\ttempData" + proc->getName() + "Str = tempData" + proc->getName() + ";\n";
-						commStr += "\treturn result;\n";
+						// IN
+
 					} else {
-						commStr += "\t/*Define your own Ip Str and portNum here*/\n";
-						commStr += "\tstd::string IPStr_ = \"255.255.255.255\";\n";
-						commStr += "\tu_short portNum_ = 6666;\n";
-						commStr += "\tUDPSender snd;\n";
-						commStr += "\t/*Add length and data content to send here*/\n";
-						commStr += "\tu_char* data_ = (u_char*)tempData" + proc->getName() +"Str.c_str();\n";
-						commStr += "\tint length_ = tempData" + proc->getName() + "Str.size();\n";
-						commStr += "\tint result = snd.sendPacket(data_, length_, IPStr_, portNum_);\n";
-						commStr += "\treturn result;\n";
+                        // OUT
 					}
 					methodBody = "{\n" + commStr +"\n}\n";
 				} else {
 					std::cout << "Invalid commway num." << std::endl;
 				}
-				outStr += (commHandlerStr + methodDef + methodBody);
+				outStr += (commHandlerStr + methodSig + methodBody);
 			}
 			std::cout << "generate Communication Methods Over" << std::endl;
-
-			std::cout << "generate Crypt Methods" << std::endl;
-			for(Method* m : proc->getMethods())
-			{
-				std::string rttStr =  m->getReturnType()->getName();
-				std::string classNamespace = proc->getName() + "::";
-				std::string methodName = m->getName();
-				std::string attrStr = "(";
-				int i = 1;
-				for (Attribute* a : m->getAttributes()) 
-				{
-					std::string termStr = a->getType()->getName() + " " + a->getIdentifier();
-					attrStr += termStr;
-					if (i < m->getAttributes().size()) 
-					{
-						attrStr += ", ";
-					}
-					i++;
-				}
-				attrStr += ")";
-				std::string methodDef = rttStr + " " + classNamespace + methodName + attrStr;
-				std::string returnVal = "\t" + rttStr + " result;" + CR;
-				std::string ret = "\treturn result;\n";
-				std::string cryptStr = "";
-				if(m->getAlgorithmId().compare(""))
-				{
-					//std::cout << "IDIDIDIDDIDIDIIDID: " << m->getAlgorithmId() << std::endl;
-					if(!m->getAlgorithmId().compare("AES")){
-						if(m->getName().find("Enc") != string::npos){
-							Attribute* a = m->getAttributes().front();
-							cryptStr += "\tstd::string key_;\n";
-							cryptStr += "\t/*Add your own serialization logic here*/\n";	
-							cryptStr += "\tstd::ostringstream os;\n";
-							cryptStr += "\tboost::archive::text_oarchive oa(os);\n";
-							cryptStr += "\toa << " + a->getIdentifier() + ";\n";
-							cryptStr += "\tstd::string content_ = os.str();\n";
-							cryptStr += "\t/*Configure the mod and the length of the cryptLib*/\n";
-							cryptStr += "\tint length = 1000;\n";
-							cryptStr += "\tchar* out = (char*)malloc(sizeof(char) * length);\n";
-							cryptStr += "\tmemset(out, 0, content_.size());\n";
-							cryptStr += "\tCryptor cryptor;\n";
-							cryptStr += "\tcryptor.aes_encrypt((char*)content_.c_str(), (char*)key_.c_str(), out);\n";
-						} else if(m->getName().find("Dec") != string::npos){
-							Attribute* a = m->getAttributes().front();
-							cryptStr += "\t/*Add your input data here*/\n";
-							cryptStr += "\tstd::string input_;\n";
-							cryptStr += "\tstd::string key_;\n";
-							cryptStr += "\tchar* out = (char*)malloc(sizeof(char) * 1000);\n";
-							cryptStr += "\tint length = 1000;\n";
-							cryptStr += "\tmemset(out, 0, length);\n";
-							cryptStr += "\tCryptor cryptor;\n";
-							cryptStr += "\tcryptor.aes_decrypt((char*)input_.c_str(), (char*)key_.c_str(), out);\n";
-							cryptStr += "\tstd::string content_ = out;\n";
-							cryptStr += "\tstd::istringstream is(content_);\n";
-							cryptStr += "\tboost::archive::text_iarchive ia(is);\n";
-							cryptStr += "\tia >> " + a->getIdentifier() + ";\n";
-							cryptStr += "\tfree(out);\n";
-						}
-
-					} else if(!m->getAlgorithmId().compare("RSA")){
-						if(m->getName().find("Enc") != string::npos){
-							Attribute* a = m->getAttributes().front();
-							cryptStr += "\tstd::string pubkey_;\n";
-							cryptStr += "\t/*Add your own serialization logic here*/\n";	
-							cryptStr += "\tstd::ostringstream os;\n";
-							cryptStr += "\tboost::archive::text_oarchive oa(os);\n";
-							cryptStr += "\toa << " + a->getIdentifier() + ";\n";
-							cryptStr += "\tstd::string content_ = os.str();\n";
-							cryptStr += "\t/*Configure the mod and the length of the cryptLib*/\n";
-							cryptStr += "\tint length = 1000;\n";
-							cryptStr += "\tchar* out = (char*)malloc(sizeof(char) * length);\n";
-							cryptStr += "\tmemset(out, 0, content_.size());\n";
-							cryptStr += "\tCryptor cryptor;\n";
-							cryptStr += "\tcryptor.rsa_encrypt((char*)content_.c_str(), (char*)pubkey_.c_str(), out);\n";
-						} else if(m->getName().find("Dec") != string::npos){
-							Attribute* a = m->getAttributes().front();
-							cryptStr += "\t/*Add your input data here*/\n";
-							cryptStr += "\tstd::string input_;\n";
-							cryptStr += "\tstd::string prikey_;\n";
-							cryptStr += "\tchar* out = (char*)malloc(sizeof(char) * 1000);\n";
-							cryptStr += "\tint length = 1000;\n";
-							cryptStr += "\tmemset(out, 0, length);\n";
-							cryptStr += "\tCryptor cryptor;\n";
-							cryptStr += "\tcryptor.rsa_decrypt((char*)input_.c_str(), (char*)prikey_.c_str(), out);\n";
-							cryptStr += "\tstd::string content = out;\n";
-							cryptStr += "\tstd::istringstream is(content);\n";
-							cryptStr += "\tboost::archive::text_iarchive ia(is);\n";
-							cryptStr += "\tia >> " + a->getIdentifier() + ";\n";
-							cryptStr += "\tfree(out);\n";
-						}
-					}
-					else {
-						//TODO later modify here
-						cryptStr += "\t/*Add your input data here*/\n";
-						cryptStr += "\t/*Configure the mod and the length of the cryptLib*/\n";
-						cryptStr += "\tint length_;\n";
-						cryptStr += "\tint mod_ = -1;\n";
-						cryptStr += "\tchar* in_ = (char*)malloc(sizeof(char)*length);\n";
-						cryptStr += "\tchar* out_;\n";
-						cryptStr += "\t/*configure the key*/\n";
-						cryptStr += "\tchar* key_;\n";
-						cryptStr += "\tCryptor crypt = new Cryptor();\n";
-						cryptStr += "\tcrypt.crypt(in_, key_, length_, out_, mod_);\n";		
-					}
-				}
-				
-				std::string methodBody = "{\n" + cryptStr + returnVal + ret + "\n}\n";
-				outStr += (methodDef + methodBody);
-			}
-			
-			std::cout << "generate Crypt Methods Over" << std::endl;
 
 			std::cout << "generate SML Main loop method" << std::endl;
 			outStr += ("void " + proc->getName() + "::SMLMain" + proc->getName() + "(){\n");
@@ -633,7 +504,7 @@ namespace isadt{
 						std::cout << e->getFromVertex()->getName() << v->getName() << std::endl;
 						
 						std::cout << "caseBody"<< std::endl;
-						if(e->getGuard() != nullptr){
+						if(!e->isGuardNull()){
 							hasCondition = true;
 							std::cout << "generate If branch: " << e->getGuard()->to_string() << std::endl;
 							casesBody += (caseBodyTab + (elseIf ? "else if(" : "if(") + e->getGuard()->to_string() + "){") + CR;
@@ -681,6 +552,36 @@ namespace isadt{
 			return casesBody;
 		}
 
+        int getAttrsLen(const list<Attribute*>& attrs)
+        {
+            int len = 0;
+            for (auto& attr : attrs) {
+                len += attr->getLength();
+            }
+            return len;
+        }
+
+        std::string generateAttr(const std::string& typeName, const std::string& id, bool isArray, int len)
+        {
+            if (typeName == "int" && isArray) {
+                return "u_int " + id + "[" + std::to_string(len) + "];\n";
+            } else if (typeName == "int" && len == 4) {
+                return "u_int " + id + ";\n";
+            } else if (typeName == "int" && len == 2) {
+                return "u_short " + id + ";\n";
+            } else if (typeName == "byte" && isArray) {
+                return "u_char " + id + "[" + std::to_string(len) + "];\n";
+            } else if (typeName == "byte") {
+                return "u_char " + id + ";\n";
+            } else if (typeName == "ByteVec") {
+                return "u_char* " + id + ";\n";
+            }
+            if (typeName == "byte") {
+                std::cout << "isArray: " << isArray <<  ", len: " << len << std::endl;
+            }
+            return typeName + " " + id + ";\n";
+        }
+
         /*-------------Generate UserTypes-------------*/
 		void CPPCodeGenerator::generateUserTypes(std::string path, Model* model)
 		{
@@ -690,54 +591,59 @@ namespace isadt{
 		    std::string outStr = "";
 			std::cout << "generate Usertype" << std::endl;
 			outStr += this->generateCommonIncludes();
-			outStr += this->generateTimer();
+			// outStr += this->generateTimer();
 			for(UserType* u : model->getUserTypes())
 			{
 				//make sure 
-				if(!u->getName().compare("")){
+				if(u->getName() == ""){
 					continue;
 				}
+                outStr += ("#pragma pack(1)\n");
 				if(u->getBase()){
-					outStr += ("class " + u->getName() + " : public " + u->getBase()->getName() + "{") + CR;
+					outStr += ("struct " + u->getName() + " : public " + u->getBase()->getName() + "{") + CR;
+                    if (u->getBase()->getName() == "Message") {
+                        // outStr += "\tpublic:\n";
+                        auto len = getAttrsLen(u->getAttributes());
+                        outStr += "\t\tu_int getLen() {return " + std::to_string(len) + ";}\n";
+                        if (u->getSigLen() != 0) {
+                            outStr += "\t\tu_char* getSig() {return " + u->getAttributes().back()->getIdentifier() + ";}\n";
+                            outStr += "\t\tu_int getSigLen() {return " + std::to_string(u->getSigLen()) + ";}\n";
+                        }
+                        outStr += "\n\n";
+                    }
 				} else {
-					outStr += ("class " + u->getName() + "{") + CR;
+					outStr += ("struct " + u->getName() + "{") + CR;
 				}
-				outStr += "\tpublic:\n";
-				if(!u->getName().compare("ByteVec")){
-					outStr += "\t\tstd::string str;\n";
-				}
-				for(Attribute* a : u->getAttributes())
-				{
-					outStr += "\t\t" + (a->getType()->getName() + " " + a->getIdentifier()) + ";\n";
-				}
-				if(!u->getName().compare("ByteVec")){
-					outStr += "\t\tstd::string getStr();\n";
-				}
-				for(Method* m : u->getMethods()){
-					outStr += "\t\t" + (m->getReturnType()->getName() + " " + m->getName() + "(");
-					int i = 1;
-					if(m->getAttributes().size() > 0){
-						for(Attribute* a : m->getAttributes()){
-							if(i < m->getAttributes().size()){	
-								outStr += a->getType()->getName() + " " + a->getIdentifier() + ", ";
-							} else {
-								outStr += a->getType()->getName() + " " + a->getIdentifier() + "){\n";
-							}
-						}
-					} else {
-						outStr += "){\n";
-					}
-					
-					outStr += "\t\t\t" + m->getReturnType()->getName() + " " + "result;\n";
-					outStr += 
-				//outStr += this->generateByteVecAndTimer();"\t\t\treturn result;\n"; 
-					outStr += "\t\t}\n";
-				}
+                
+                if (u->getName() == "ByteVec") {
+                    // ByteVec
+                    // outStr += "\tpublic:\n";
+                    outStr += "\t\tvirtual u_int getLen() {return 0;}\n";
+                    outStr += "\t\tvirtual u_char* getSig() {return NULL;}\n";
+                    outStr += "\t\tvirtual u_int getSigLen() {return 0;}\n";
+                } else {
+                    // if (u->getAttributes().size() > 0) {
+                    //     outStr += "\tpublic:\n";
+                    // }
+                    for(Attribute* a : u->getAttributes())
+                    {
+                        outStr += "\t\t" + generateAttr(a->getType()->getName(), a->getIdentifier(), a->getArray(), a->getLength());
+                        // outStr += "\t\t" + (a->getType()->getName() + " " + a->getIdentifier()) + ";\n";
+                    }
+                    for(Method* m : u->getMethods()){
+                        auto& rttStr = m->getReturnType()->getName();
+                        m->getAttributes().size();
+                        auto methodSig = generateMethodSignature(rttStr, "", m->getName(), m->getAttributes());
+                        outStr += methodSig + "\t\t\t" + m->getReturnType()->getName() + " " + "result;\n";
+                        outStr += "\t\t}\n";
+                    }
+                }
+
 				outStr += "};\n";
-				std::cout << outStr << std::endl;
+                outStr += ("#pragma pack()\n");
 			}
 			
-			outStr += this->generateSerializeBinding(model);
+			// outStr += this->generateSerializeBinding(model);
 			std::cout << "end usertypes" << std::endl;
 			outUserTypeFile.open(path  + "/" + fileName, std::ofstream::out | std::ostream::out);
 			outUserTypeFile << outStr << std::endl;

@@ -342,7 +342,7 @@ int main(int argc, char *argv[]) {
                     {
                         /* generate code, linux, C++ code */
                         cout << "--cpp" << endl;
-                        std::string path = "../../../generated";
+                        std::string path = "./generated";
                         CPPCodeGenerator gen;
                         gen.generateAll(path, &model);
                         cout << "generate code, linux, C++ code" << endl;
