@@ -3,9 +3,6 @@
  */
 
 #include "FacadeImp.hpp"
-#include "Cryptor.hpp"
-#include "EtherReceiver.hpp"
-#include "UDPReceiver.hpp"
 extern int digital_sign(const char* msg, size_t msgLen, const char* key, const string& id);
 extern int digital_verify(const char* sig, const char* msg, size_t msgLen, unsigned int verify_id, const char* key);
 
@@ -175,7 +172,7 @@ namespace isadt {
         return result;
     }
 
-    int UDPRecv(MQ& mq, const char* ip, unsigned short port) {
+    int UDPRecv(ConcurrentQueue& mq, const char* ip, unsigned short port) {
         /*Add IP Str and portNUm here*/
         bool breakListen = true;
         UDPReceiver  er;

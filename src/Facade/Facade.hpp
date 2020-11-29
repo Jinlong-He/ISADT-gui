@@ -3,7 +3,7 @@
  */
 
 #include<string>
-//#include<MQ.h>
+#include "MQ.h"
 using namespace std;
 
 namespace isadt {
@@ -17,7 +17,7 @@ namespace isadt {
         virtual int AsymEnc(const char* msg, size_t msgLen, const char* new_msg, size_t sigLen, const char* key, const string& id) = 0;
         virtual int AsymDec(const char* msg, size_t msgLen, const char* new_msg, size_t sigLen, const char* key, const string& id) = 0;
         virtual int EhRecv() = 0;
-        virtual int UDPRecv(MQ& mq, const char* ip, unsigned short port) = 0;
+        virtual int UDPRecv(ConcurrentQueue& mq, const char* ip, unsigned short port) = 0;
 
     };
 }
