@@ -1,10 +1,10 @@
 #include "Verifier/ProverifTranslator.hpp"
 using std::cout, std::endl;
 namespace isadt {
-    void getMessage(const list<Action*>& actions, unordered_map<Attribute*, vector<Attribute>>& map) {
+    void getMessage(const list<Action*>& actions, unordered_map<Attribute*, vector<Term*>>& map) {
         for (auto action : actions) {
             if (action -> isAssignmentAction()) {
-                if (action -> getRhs() -> getTermType() == AT) {
+                if (action -> getLhs() -> getTermType() == AT) {
                     auto at = (AttributeTerm*)action -> getLhs();
                     auto attr = at -> getAttribute();
                     auto type = attr -> getType();
@@ -15,8 +15,9 @@ namespace isadt {
                     if (map.count(attr) == 0) {
                         vec.resize(type -> getAttributes().size());
                     }
-                    auto child = attr -> getChildren().front();
-                    vec[type -> getID()];
+                    auto childTerm = at -> getChildren().front();
+                    auto child = ((AttributeTerm*)childTerm) -> getAttribute();
+                    vec[type -> getID(child -> getIdentifier())] = action -> getRhs();
                 }
             }
         }
