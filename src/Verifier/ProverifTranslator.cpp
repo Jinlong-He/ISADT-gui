@@ -49,10 +49,10 @@ namespace isadt {
                     messageActions.push_back(action);
                 }
             }
-            unordered_map<Attribute*, vector<Term*> > map;
-            unordered_map<Attribute*, string> strMap;
-            //getMessage(messageActions, map);
-            for (auto&[attr, vec] : map) {
+            unordered_map<string, vector<Term*> > attrMap;
+            unordered_map<string, string> strMap;
+            getMessage(messageActions, attrMap);
+            for (auto&[attr, vec] : attrMap) {
                 auto& str = strMap[attr];
                 str = "(";
                 for (auto term : vec) {
