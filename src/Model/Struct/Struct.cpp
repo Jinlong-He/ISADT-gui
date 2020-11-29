@@ -12,6 +12,7 @@ namespace isadt {
         Attribute* attr = new Attribute(type, name, array);
         attributes_.push_back(attr);
         attributeMap_[name] = attr;
+        attributeIdMap_[name] = attributes_.size() - 1;
         return attr;
     }
 
@@ -30,5 +31,10 @@ namespace isadt {
 
     const list<Attribute*>& Struct::getAttributes() const {
         return attributes_;
+    }
+
+    size_t Struct::getID(const string& name) const {
+        if (attributeIdMap_.count(name) == 0) return -1;
+        return attributeIdMap_.at(name);
     }
 }
