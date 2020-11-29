@@ -1,6 +1,7 @@
 #include "Parser/XmlParser/XmlParser.hpp"
 #include "Parser/LParser/LParser.hpp"
 #include "Manage.hpp"
+using std::cout, std::endl;
 namespace isadt {
     void XmlParser::parse(const char* fileName, Model* model) {
         XMLDocument doc;
@@ -105,6 +106,9 @@ namespace isadt {
                                         strcmp(root -> Attribute("inOutSuffix"), "In"),
                                         root -> Attribute("commWay"));
         //cout << "commMethod: " + method -> getName() << endl;
+        if (strcmp(root -> Attribute("commWay"), "NativeEthernetFrame") == 0) {
+            method -> setType(root -> Attribute("typeId"));
+        }
         if (!(root -> NoChildren())) {
             auto element = root -> FirstChildElement();
             while (element) {
@@ -127,11 +131,22 @@ namespace isadt {
         if (base) {
             userType -> setBase(model -> getUserTypeByName(base));
         }
+        if (strcmp(base, "Message") == 0) {
+            userType -> setMsgType(root -> Attribute("msgType"));
+            if (strcmp(root -> Attribute("signLen"), "") != 0) {
+                userType -> setSigLen(root -> Attribute("signLen"));
+            }
+        }
         if (!(root -> NoChildren())) {
             auto element = root -> FirstChildElement();
             while (element) {
                 if (strcmp(element -> Value(), "Attribute") == 0) {
                     auto attr = parseAttribute(element, userType, model);
+                    if (strcmp(base, "Message") == 0) {
+                        if (strcmp(element -> Attribute("len"), "") != 0) {
+                            attr -> setLength(element -> Attribute("len"));
+                        }
+                    }
                 } else {
                     auto method = parseMethod(element, userType, model);
                 }
@@ -271,8 +286,8 @@ namespace isadt {
     void XmlParser::parseIntegrity(XMLElement* root, Model* model) {
         auto proc1 = model -> getProcByName(root -> Attribute("processA"));
         auto proc2 = model -> getProcByName(root -> Attribute("processB"));
-        model -> mkIntegratyProperty(proc1, root -> Attribute("stateA"), proc1 -> getAttributeByName(root -> Attribute("attributeA_Attr")),
-                                     proc2, root -> Attribute("stateB"), proc2 -> getAttributeByName(root -> Attribute("attributeBAttr")));
+        model -> mkIntegratyProperty(proc1, root -> Attribute("stateA"), proc1 -> getAttributeByName(root -> Attribute("attributeA")),
+                                     proc2, root -> Attribute("stateB"), proc2 -> getAttributeByName(root -> Attribute("attributeB")));
     }
 
     void XmlParser::parseAvailability(XMLElement* root, Model* model) {

@@ -43,9 +43,18 @@ namespace isadt {
         const string& getCommId() const;
         void setCommId(const string& commId);
 
+        void setType(const string& type) {
+            type_ = type;
+        }
+
+        const string& getType() const {
+            return type_;
+        }
+
     private:
         bool inout_;                 //< the in_out value.
         string commId_;              //< the communication identifier.
+        string type_;
     };
 }
 

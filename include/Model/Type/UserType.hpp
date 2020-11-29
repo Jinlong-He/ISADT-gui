@@ -7,6 +7,7 @@
 
 #ifndef Model_UserType_hpp
 #define Model_UserType_hpp 
+#include <iostream>
 #include "../Struct/Class.hpp"
 
 namespace isadt {
@@ -14,19 +15,42 @@ namespace isadt {
     class UserType : public Class {
     public:
         UserType()
-            : Class() {}
+            : Class(),
+              sigLen_(0) {}
 
         UserType(const string& name, 
                  UserType* base = nullptr)
             : Class(name),
-              base_(base) {}
+              base_(base),
+              sigLen_(0) {}
 
         ~UserType() {}
 
         UserType* getBase();
         void setBase(UserType* base);
+        void setMsgType(const string& msgType) {
+            msgType_ = msgType;
+        }
+
+        const string& getMsgType() const {
+            return msgType_;
+        }
+
+        void setSigLen(int sigLen) {
+            sigLen_ = sigLen;
+        }
+
+        void setSigLen(const string& sigLen) {
+            sigLen_ = std::stoi(sigLen);
+        }
+
+        int getSigLen() const {
+            return sigLen_;
+        }
     private:
         UserType* base_;                  //< the base type of this type.
+        string msgType_;
+        int sigLen_;
     };
 }
 

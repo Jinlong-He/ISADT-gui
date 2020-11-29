@@ -85,6 +85,7 @@ namespace isadt {
         static UserType* byteType_;
         static UserType* byteVecType_;
         static UserType* timerType_;
+        static UserType* messageType_;
         static unordered_map<string, UserType*> typeMap_;
     };
 }

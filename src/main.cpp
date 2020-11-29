@@ -21,12 +21,14 @@ UserType* Manage::numberType_(new UserType("number"));
 UserType* Manage::byteType_(new UserType("byte"));
 UserType* Manage::byteVecType_(new UserType("ByteVec"));
 UserType* Manage::timerType_(new UserType("Timer"));
+UserType* Manage::messageType_(new UserType("Message"));
 unordered_map<string, UserType*> Manage::typeMap_({{"int", Manage::intType_},
                                                    {"bool", Manage::boolType_},
                                                    {"number", Manage::numberType_},
                                                    {"byte", Manage::byteType_},
-                                                   {"ByteVet", Manage::byteVecType_},
-                                                   {"Timer", Manage::timerType_}});
+                                                   {"ByteVec", Manage::byteVecType_},
+                                                   {"Timer", Manage::timerType_},
+                                                   {"Message", Manage::messageType_}});
 
 int main(int argc, char *argv[]) {
     Manage::timerType_ -> mkMethod("reset");

@@ -89,6 +89,7 @@
         <Transition source="Alice_State_1" dest="Alice_State_2" guard="">
           <Action content="msgAlice1.nonce=nonce" />
           <Action content="msgAlice1.id=alice" />
+          <Action content="SymEnc(msgAlice1, msgAlice1)" />
         </Transition>
         <State name="Alice_State_2" />
         <Transition source="Alice_State_2" dest="Verify_State" guard="">
