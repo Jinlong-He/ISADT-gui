@@ -17,12 +17,14 @@ namespace isadt {
         Attribute()
             : type_(nullptr),
               identifier_(""),
-              array_(0) {}
+              array_(0),
+              length_(0) {}
 
         Attribute(UserType* type, const string& identifier, int array = 0)
             : type_(type),
               identifier_(identifier),
-              array_(array) {}
+              array_(array),
+              length_(0) {}
 
         ~Attribute() {}
 
@@ -31,10 +33,20 @@ namespace isadt {
         const string& getIdentifier() const;
         int getArray() const;
         void setIdentifier(const string& identifier);
+        void setLength(int length) {
+            length_ = length;
+        }
+        void setLength(const string& length) {
+            length_ = std::stoi(length);
+        }
+        int getLength() const {
+            return length_;
+        }
     private:
         UserType* type_;
         string identifier_;
         int array_;
+        int length_;
     };
 }
 

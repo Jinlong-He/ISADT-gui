@@ -22,6 +22,7 @@ namespace isadt {
                     cout << 222 << endl;
                     auto childTerm = at -> getChildren().front();
                     cout << childTerm << endl;
+                    cout << childTerm -> getTermType() << endl;
                     auto child = ((AttributeTerm*)childTerm) -> getAttribute();
                     cout << child -> getIdentifier() << endl;
                     cout << type -> getID(child -> getIdentifier()) << endl;
