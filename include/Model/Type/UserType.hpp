@@ -7,6 +7,7 @@
 
 #ifndef Model_UserType_hpp
 #define Model_UserType_hpp 
+#include <iostream>
 #include "../Struct/Class.hpp"
 
 namespace isadt {

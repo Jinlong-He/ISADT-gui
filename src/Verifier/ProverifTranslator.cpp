@@ -22,7 +22,6 @@ namespace isadt {
         }
     }
 
-
     void ProverifTranslator::translateProcess(Process* process) {
         auto sm = process -> getStateMachines().front();
         auto vertex = sm -> getStartVertex();

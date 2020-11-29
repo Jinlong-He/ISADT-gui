@@ -1,6 +1,7 @@
 #include "Parser/XmlParser/XmlParser.hpp"
 #include "Parser/LParser/LParser.hpp"
 #include "Manage.hpp"
+using std::cout, std::endl;
 namespace isadt {
     void XmlParser::parse(const char* fileName, Model* model) {
         XMLDocument doc;
@@ -130,17 +131,21 @@ namespace isadt {
         if (base) {
             userType -> setBase(model -> getUserTypeByName(base));
         }
-        if (base == "Message") {
+        if (strcmp(base, "Message") == 0) {
             userType -> setMsgType(root -> Attribute("msgType"));
-            userType -> setSigLen(root -> Attribute("signLen"));
+            if (strcmp(root -> Attribute("signLen"), "") != 0) {
+                userType -> setSigLen(root -> Attribute("signLen"));
+            }
         }
         if (!(root -> NoChildren())) {
             auto element = root -> FirstChildElement();
             while (element) {
                 if (strcmp(element -> Value(), "Attribute") == 0) {
                     auto attr = parseAttribute(element, userType, model);
-                    if (base == "Message") {
-                        attr -> setLength(element -> Attribute("len"));
+                    if (strcmp(base, "Message") == 0) {
+                        if (strcmp(element -> Attribute("len"), "") != 0) {
+                            attr -> setLength(element -> Attribute("len"));
+                        }
                     }
                 } else {
                     auto method = parseMethod(element, userType, model);
