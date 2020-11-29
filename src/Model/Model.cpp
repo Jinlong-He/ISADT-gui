@@ -16,7 +16,7 @@ namespace isadt{
 
     void Model::addUserType(UserType* type) {
         const string& typeStr = type -> getName();
-        if (typeStr != "int" && typeStr != "bool" && typeStr != "Timer") {
+        if (typeStr != "int" && typeStr != "bool" && typeStr != "Timer" && typeStr != "byte") {
             userTypes_.push_back(type);
         }
         userTypeMap_[type -> getName()] = type;
