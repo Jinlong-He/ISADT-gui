@@ -34,52 +34,83 @@ namespace isadt {
     }
 
     void ProverifTranslator::translateProcess(Process* process) {
+        unordered_set<string> attrSet;
         auto sm = process -> getStateMachines().front();
         auto vertex = sm -> getStartVertex();
+        list<Action*> actions;
         while (vertex != sm -> getEndVertex()) {
             auto edge = vertex -> getNexts().front();
-            list<Action*> messageActions;
-            const auto& actions = edge -> getActions();
-            unordered_map<string, vector<Term*> > attrMap;
-            unordered_map<string, string> strMap;
-            for (auto action : actions) {
-                if (action -> isAssignmentAction()) {
-                    if (!action -> getRhs() && action -> getLhs() -> getTermType() == MT) {
-                        getMessage(messageActions, attrMap, strMap);
-                        messageActions.clear();
-                        auto methodTerm = ((MethodTerm*)action -> getLhs());
-                        auto method = methodTerm -> getMethod();
-                        if (method -> isCommMethod()) {
-                            string inoutStr = ((CommMethod*)method) -> getInOut() ? "in" : "out";
-                            auto mess = methodTerm -> getArgs().front();
-                            if (mess -> getTermType() != AT) continue;
-                            string messStr = ((AttributeTerm*)mess) -> getAttribute() -> getIdentifier();
-                            string res = inoutStr + "(c, " + messStr + ": bitstring);";
-                            cout << res << endl;
+            if (!edge -> isGuardNull()) {
+                actions.push_back(new Action(edge -> getGuard() -> getExpression()));
+            }
+            actions.insert(actions.end(), edge -> getActions().begin(), edge -> getActions().end());
+            vertex = edge -> getToVertex();
+        }
+        list<Action*> messageActions;
+        unordered_map<string, vector<Term*> > attrMap;
+        unordered_map<string, string> strMap;
+        unordered_map<string, string> signMap;
+        for (auto action : actions) {
+            if (action -> isAssignmentAction()) {
+                if (!action -> getRhs() && action -> getLhs() -> getTermType() == MT) {
+                    getMessage(messageActions, attrMap, strMap);
+                    messageActions.clear();
+                    auto methodTerm = ((MethodTerm*)action -> getLhs());
+                    auto method = methodTerm -> getMethod();
+                    if (method -> isCommMethod()) {
+                        auto mess = methodTerm -> getArgs().front();
+                        if (mess -> getTermType() != AT) continue;
+                        string messStr = ((AttributeTerm*)mess) -> getAttribute() -> getIdentifier();
+                        if (!((CommMethod*)method) -> getInOut()) {
+                            string name = method -> getName() + "_m";
+                            string res1 = "in(c," + name + ": bitstring);";
+                            string res2 = "let " + messStr + " = " + name + " in";
+                            cout << res1 << endl << res2 << endl;
                         } else {
-                            if (method -> getName() == "Sign") {
-                                //string res = "new "
-                                string res = "sign(";
-                                for (auto attrTerm : methodTerm -> getArgs()) {
-                                    if (attrTerm -> getTermType() != AT) continue;
-                                    const auto& attrStr = ((AttributeTerm*)attrTerm) -> getAttribute() -> getIdentifier();
-                                    if (strMap.count(attrStr) > 0) {
-                                        res += strMap[attrStr] + ",";
-                                    } else {
-                                        res += attrStr + ",";
-                                    }
-                                }
-                                res[res.length() - 1] = ')';
-                                cout << res << endl;
-                            } else if (method -> getName() == "Verify") {
+                            string res = "out(c,";
+                            if (signMap.count(messStr) > 0) {
+                                res += signMap.at(messStr) + ");";
+                            } else {
+                                res += messStr + ");";
                             }
+                            cout << res << endl;
                         }
                     } else {
-                        messageActions.push_back(action);
+                        if (method -> getName() == "Sign") {
+                            //string res = "new "
+                            string res = "sign(";
+                            string firstStr = "";
+                            size_t i = 0;
+                            for (auto attrTerm : methodTerm -> getArgs()) {
+                                if (attrTerm -> getTermType() != AT) continue;
+                                const auto& attrStr = ((AttributeTerm*)attrTerm) -> getAttribute() -> getIdentifier();
+                                if (i == 0) firstStr = attrStr;
+                                if (strMap.count(attrStr) > 0) {
+                                    res += strMap[attrStr] + ",";
+                                } else {
+                                    res += attrStr + ",";
+                                }
+                                i++;
+                            }
+                            res[res.length() - 1] = ')';
+                            signMap[firstStr] = res;
+                        } else if (method -> getName() == "Verify") {
+                        }
                     }
+                } else {
+                    auto rhsTerm = action -> getRhs();
+                    if (rhsTerm != nullptr && rhsTerm -> getTermType() == AT) {
+                        string attrStr = ((AttributeTerm*) rhsTerm) -> getAttribute() -> getIdentifier();
+                        string typeStr = ((AttributeTerm*) rhsTerm) -> getAttribute() -> getType() -> getName();
+                        if (attrSet.count(attrStr) == 0) {
+                            attrSet.insert(attrStr);
+                            string res = "new " + attrStr + ":" + typeStr + ";";
+                            cout << res << endl;
+                        }
+                    }
+                    messageActions.push_back(action);
                 }
             }
-            vertex = edge -> getToVertex();
         }
     }
 
