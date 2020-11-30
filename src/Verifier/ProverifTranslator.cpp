@@ -1,7 +1,7 @@
 #include "Verifier/ProverifTranslator.hpp"
 using std::cout, std::endl;
 namespace isadt {
-    void getMessage(const list<Action*>& actions, unordered_map<string, vector<Term*>>& attrMap,
+    void getMessage(const list<Action*>& actions, unordered_map<string, vector<string>>& attrMap,
             unordered_map<string, string>& strMap) {
         for (auto action : actions) {
             if (action -> isAssignmentAction()) {
@@ -17,23 +17,30 @@ namespace isadt {
                     }
                     auto childTerm = at -> getChildren().front();
                     auto child = ((AttributeTerm*)((Expression*)childTerm) -> getTerm1()) -> getAttribute();
-                    attrMap.at(attr -> getIdentifier())[type -> getID(child -> getIdentifier())] = action -> getRhs();
+                    if (action -> getRhs() -> getChildren().size() == 0) {
+                        string name = ((AttributeTerm*)action -> getRhs()) -> getAttribute() -> getIdentifier();
+                        attrMap.at(attr -> getIdentifier())[type -> getID(child -> getIdentifier())] = name;
+                    } else {
+                        string name = ((AttributeTerm*)action -> getRhs()) -> getType() -> getName() + "_" +
+                            ((AttributeTerm*)((Expression*)action -> getRhs() -> getChildren().front()) -> getTerm1()) -> getAttribute() -> getIdentifier();
+                        
+                        attrMap.at(attr -> getIdentifier())[type -> getID(child -> getIdentifier())] = name;
+                    }
                 }
             }
         }
         for (auto&[attr, vec] : attrMap) {
             auto& str = strMap[attr];
             str = "(";
-            for (auto term : vec) {
-                if (term) {
-                    str += term -> to_string() + ",";
-                }
+            for (auto name : vec) {
+                str += name + ",";
             }
             str[str.length() - 1] = ')';
         }
     }
 
     void ProverifTranslator::translateProcess(Process* process) {
+        string res = "let process" + process -> getName() + "(";
         unordered_set<string> attrSet;
         auto sm = process -> getStateMachines().front();
         auto vertex = sm -> getStartVertex();
@@ -47,8 +54,9 @@ namespace isadt {
             vertex = edge -> getToVertex();
         }
         list<Action*> messageActions;
-        unordered_map<string, vector<Term*> > attrMap;
+        unordered_map<string, vector<string> > attrMap;
         unordered_map<string, string> strMap;
+        unordered_map<string, vector<string> > verMap;
         unordered_map<string, string> signMap;
         for (auto action : actions) {
             if (action -> isAssignmentAction()) {
@@ -95,17 +103,42 @@ namespace isadt {
                             res[res.length() - 1] = ')';
                             signMap[firstStr] = res;
                         } else if (method -> getName() == "Verify") {
+                            string res1 = "let (";
+                            string res2 = " = checksign(";
+                            size_t i = 0;
+                            Attribute* attr = nullptr;
+                            for (auto attrTerm : methodTerm -> getArgs()) {
+                                if (attrTerm -> getTermType() != AT) continue;
+                                const auto& attrStr = ((AttributeTerm*)attrTerm) -> getAttribute() -> getIdentifier();
+                                if (i == 0)  attr = ((AttributeTerm*)attrTerm) -> getAttribute();
+                                res2 += attrStr + ",";
+                                i++;
+                            }
+                            auto type = attr -> getType();
+                            auto& vec = verMap[attr -> getIdentifier()];
+                            for (auto attr : type -> getAttributes()) {
+                                string name = type -> getName() + "_" + attr -> getIdentifier();
+                                vec.push_back(name);
+                                res1 += name + ",";
+                            }
+                            res1[res1.length() - 1] = ')';
+                            res2[res2.length() - 1] = ')';
+                            string res = res1 + res2 + " in";
+                            cout << res << endl;
                         }
                     }
                 } else {
                     auto rhsTerm = action -> getRhs();
                     if (rhsTerm != nullptr && rhsTerm -> getTermType() == AT) {
-                        string attrStr = ((AttributeTerm*) rhsTerm) -> getAttribute() -> getIdentifier();
-                        string typeStr = ((AttributeTerm*) rhsTerm) -> getAttribute() -> getType() -> getName();
-                        if (attrSet.count(attrStr) == 0) {
-                            attrSet.insert(attrStr);
-                            string res = "new " + attrStr + ":" + typeStr + ";";
-                            cout << res << endl;
+                        if (rhsTerm -> getChildren().size() == 0) {
+                            string attrStr = ((AttributeTerm*) rhsTerm) -> getAttribute() -> getIdentifier();
+                            string typeStr = ((AttributeTerm*) rhsTerm) -> getAttribute() -> getType() -> getName();
+                            if (attrSet.count(attrStr) == 0) {
+                                attrSet.insert(attrStr);
+                                string res = "new " + attrStr + ":" + typeStr + ";";
+                                cout << res << endl;
+                            }
+                        } else {
                         }
                     }
                     messageActions.push_back(action);
