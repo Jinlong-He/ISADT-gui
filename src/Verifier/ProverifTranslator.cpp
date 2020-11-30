@@ -50,17 +50,23 @@ namespace isadt {
                         auto methodTerm = ((MethodTerm*)action -> getLhs());
                         auto method = methodTerm -> getMethod();
                         if (method -> isCommMethod()) {
+                            string inoutStr = ((CommMethod*)method) -> getInOut() ? "in" : "out";
+                            auto mess = methodTerm -> getArgs().front();
+                            if (mess -> getTermType() != AT) continue;
+                            string messStr = ((AttributeTerm*)mess) -> getAttribute() -> getIdentifier();
+                            string res = inoutStr + "(c, " + messStr + ": bitstring);";
+                            cout << res << endl;
                         } else {
                             if (method -> getName() == "Sign") {
-                                string res = "Sign(";
+                                //string res = "new "
+                                string res = "sign(";
                                 for (auto attrTerm : methodTerm -> getArgs()) {
-                                    if (attrTerm -> getTermType() == AT) {
-                                        const auto& attrStr = ((AttributeTerm*)attrTerm) -> getAttribute() -> getIdentifier();
-                                        if (strMap.count(attrStr) > 0) {
-                                            res += strMap[attrStr] + ",";
-                                        } else {
-                                            res += attrStr + ",";
-                                        }
+                                    if (attrTerm -> getTermType() != AT) continue;
+                                    const auto& attrStr = ((AttributeTerm*)attrTerm) -> getAttribute() -> getIdentifier();
+                                    if (strMap.count(attrStr) > 0) {
+                                        res += strMap[attrStr] + ",";
+                                    } else {
+                                        res += attrStr + ",";
                                     }
                                 }
                                 res[res.length() - 1] = ')';
