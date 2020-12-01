@@ -177,6 +177,23 @@ namespace isadt {
                 confPropMap[pp -> getProc()].push_back(pp -> getAttribute());
             }
         }
+        for (auto p : model_ -> getProps()) {
+            if (p -> getPropertyType() == INTEGRATY) {
+                auto pp = (IntegratyProperty*) p;
+                os << "event " + 
+                    pp -> getProc1() -> getName() + pp -> getVertex1() 
+                    + "(" + pp -> getAttr1() -> getType() -> getName() + ")." << endl;
+                os << "event " + 
+                    pp -> getProc2() -> getName() + pp -> getVertex2() 
+                    + "(" + pp -> getAttr2() -> getType() -> getName() + ")." << endl;
+                os << "query " + pp -> getAttr1() -> getIdentifier() + ":" +
+                    pp -> getAttr1() -> getType() -> getName() + "; inj-event(" +
+                    pp -> getProc2() -> getName() + pp -> getVertex2() +
+                    "(" + pp -> getAttr1() -> getIdentifier() + ")) ==> inj-event(" +
+                    pp -> getProc1() -> getName() + pp -> getVertex1() +
+                    "(" + pp -> getAttr1() -> getIdentifier() + "))." << endl;
+            }
+        }
         unordered_map<Process*, vector<Attribute*> > knowledgeMap;
         unordered_map<string, string> pairMap;
         string endStr = "process\n";

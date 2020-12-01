@@ -125,18 +125,35 @@ namespace isadt {
               value1_(new Value(proc1, vertex1, attribute1)),
               value2_(new Value(proc2, vertex2, attribute2)) {}
         PropertyType getPropertyType() const { return INTEGRATY; }
+        const string& getVertex1() const {
+            return value1_ -> vertex_;
+        }
+        const string& getVertex2() const {
+            return value2_ -> vertex_;
+        }
+        Process* getProc1() const {
+            return value1_ -> proc_;
+        }
+        Process* getProc2() const {
+            return value2_ -> proc_;
+        }
+        Attribute* getAttr1() const {
+            return value1_ -> attribute_;
+        }
+        Attribute* getAttr2() const {
+            return value2_ -> attribute_;
+        }
     private:
         struct Value {
         public:
             Value()
                 : proc_(nullptr),
-                  vertex_(nullptr),
+                  vertex_(""),
                   attribute_(nullptr) {}
             Value(Process* proc, const string& vertex, Attribute* attribute)
                 : proc_(proc),
                   vertex_(vertex),
                   attribute_(attribute) {}
-        private:
             Process* proc_;
             string vertex_;
             Attribute* attribute_;
