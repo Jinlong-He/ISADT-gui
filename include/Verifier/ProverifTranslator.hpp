@@ -1,6 +1,7 @@
 #ifndef ISADT_PROVERIFTRANSLATOR_HPP
 #define ISADT_PROVERIFTRANSLATOR_HPP
 #include "../Model/Model.hpp"
+#include <iostream>
 namespace isadt {
     class ProverifTranslator {
     public:
@@ -11,7 +12,7 @@ namespace isadt {
             : model_(model) {}
 
         void translate();
-        void translateProcess(Process* proc);
+        void translateProcess(Process* proc, std::ostream& os, unordered_map<Process*, vector<Attribute*>>& confPropMap);
     private:
         Model* model_;
     };

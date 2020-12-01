@@ -1,8 +1,10 @@
 #include "Verifier/ProverifTranslator.hpp"
+#include <iostream>
+#include <fstream>
 using std::cout, std::endl;
 namespace isadt {
     void getMessage(const list<Action*>& actions, unordered_map<string, vector<string>>& attrMap,
-            unordered_map<string, string>& strMap) {
+            unordered_map<string, string>& strMap, std::ostream& os) {
         for (auto action : actions) {
             if (action -> isAssignmentAction()) {
                 if (action -> getLhs() -> getTermType() == AT) {
@@ -17,6 +19,7 @@ namespace isadt {
                     }
                     auto childTerm = at -> getChildren().front();
                     auto child = ((AttributeTerm*)((Expression*)childTerm) -> getTerm1()) -> getAttribute();
+                    //os << action -> getRhs() -> getChildren().size() << endl;
                     if (action -> getRhs() -> getChildren().size() == 0) {
                         string name = ((AttributeTerm*)action -> getRhs()) -> getAttribute() -> getIdentifier();
                         attrMap.at(attr -> getIdentifier())[type -> getID(child -> getIdentifier())] = name;
@@ -39,8 +42,7 @@ namespace isadt {
         }
     }
 
-    void ProverifTranslator::translateProcess(Process* process) {
-        string res = "let process" + process -> getName() + "(";
+    void ProverifTranslator::translateProcess(Process* process, std::ostream& os, unordered_map<Process*, vector<Attribute*>>& confPropMap) {
         unordered_set<string> attrSet;
         auto sm = process -> getStateMachines().front();
         auto vertex = sm -> getStartVertex();
@@ -61,7 +63,7 @@ namespace isadt {
         for (auto action : actions) {
             if (action -> isAssignmentAction()) {
                 if (!action -> getRhs() && action -> getLhs() -> getTermType() == MT) {
-                    getMessage(messageActions, attrMap, strMap);
+                    getMessage(messageActions, attrMap, strMap, os);
                     messageActions.clear();
                     auto methodTerm = ((MethodTerm*)action -> getLhs());
                     auto method = methodTerm -> getMethod();
@@ -73,7 +75,7 @@ namespace isadt {
                             string name = method -> getName() + "_m";
                             string res1 = "in(c," + name + ": bitstring);";
                             string res2 = "let " + messStr + " = " + name + " in";
-                            cout << res1 << endl << res2 << endl;
+                            os << res1 << endl << res2 << endl;
                         } else {
                             string res = "out(c,";
                             if (signMap.count(messStr) > 0) {
@@ -81,7 +83,7 @@ namespace isadt {
                             } else {
                                 res += messStr + ");";
                             }
-                            cout << res << endl;
+                            os << res << endl;
                         }
                     } else {
                         if (method -> getName() == "Sign") {
@@ -119,12 +121,12 @@ namespace isadt {
                             for (auto attr : type -> getAttributes()) {
                                 string name = type -> getName() + "_" + attr -> getIdentifier();
                                 vec.push_back(name);
-                                res1 += name + ",";
+                                res1 += name + ":int ,";
                             }
                             res1[res1.length() - 1] = ')';
                             res2[res2.length() - 1] = ')';
                             string res = res1 + res2 + " in";
-                            cout << res << endl;
+                            os << res << endl;
                         }
                     }
                 } else {
@@ -136,7 +138,7 @@ namespace isadt {
                             if (attrSet.count(attrStr) == 0) {
                                 attrSet.insert(attrStr);
                                 string res = "new " + attrStr + ":" + typeStr + ";";
-                                cout << res << endl;
+                                os << res << endl;
                             }
                         } else {
                         }
@@ -145,12 +147,75 @@ namespace isadt {
                 }
             }
         }
+        if (confPropMap.count(process) > 0) {
+            for (auto attr : confPropMap.at(process)) {
+                os << "let " + process -> getName() + attr -> getIdentifier()
+                    + "=" + attr -> getIdentifier() + "." << endl;
+            }
+        } else {
+            os << "new end:bitstring;" << endl;
+            os << "out(c, end)." << endl;
+        }
     }
 
     void ProverifTranslator::translate() {
-        for (auto p : model_ -> getProcesses()) {
-            translateProcess(p);
+        std::ofstream os;
+        os.open("proverif.pv");
+        os << "free c : channel." << endl;
+        os << "type spkey." << endl;
+        os << "type sskey." << endl;
+        os << "type int." << endl;
+        os << "fun spk(sskey): spkey." << endl;
+        os << "fun sign(bitstring, sskey): bitstring." << endl;
+        os << "reduc forall x: bitstring, y: sskey; getmess(sign(x,y)) = x." << endl;
+        os << "reduc forall x: bitstring, y: sskey; checksign(sign(x,y), spk(y)) = x." << endl;
+        unordered_map<Process*, vector<Attribute*>> confPropMap;
+        for (auto p : model_ -> getProps()) {
+            if (p -> getPropertyType() == CONFIDENTIAL) {
+                auto pp = ((ConfidentialProperty*) p);
+                os << "query secret " + pp -> getProc() -> getName() + pp -> getAttribute() -> getIdentifier() + "." << endl;
+                confPropMap[pp -> getProc()].push_back(pp -> getAttribute());
+            }
         }
+        unordered_map<Process*, vector<Attribute*> > knowledgeMap;
+        unordered_map<string, string> pairMap;
+        string endStr = "process\n";
+        string startProcStr = "(";
+        for (auto n : model_ -> getInitialKnowledges()) {
+            if (!n -> isKeyPair()) {
+                knowledgeMap[n -> getProc()].push_back(n -> getAttribute());
+            } else {
+                string pkStr = n -> getAttribute() -> getType() -> getName();
+                if (pkStr == "spkey") pkStr = "spk";
+                if (pkStr == "pkey") pkStr = "pk";
+                pairMap[n -> getAttribute() -> getIdentifier()] =
+                        n -> getPkKnowledge() -> getAttribute() -> getIdentifier(); 
+                string res = "new " + n -> getPkKnowledge() -> getAttribute() -> getIdentifier() + ": "
+                    + n -> getPkKnowledge() -> getAttribute() -> getType() -> getName() + ";";
+                res += "let " +n -> getAttribute() -> getIdentifier()
+                    + "=" + pkStr + "(" + n -> getPkKnowledge() -> getAttribute() -> getIdentifier() + ") in out(c, " 
+                    + n -> getPkKnowledge() -> getAttribute() -> getIdentifier() + ");\n";
+
+                endStr += res;
+            }
+        }
+        for (auto p : model_ -> getProcesses()) {
+            string res = "let process" + p -> getName() + "( ";
+            startProcStr += "(!process" + p -> getName() + "(";
+            for (auto attr : knowledgeMap[p]) {
+                res += attr -> getIdentifier() + " : " + attr -> getType() -> getName() + ",";
+                startProcStr += attr -> getIdentifier() + ",";
+            }
+            res[res.length() - 1] = ')';
+            startProcStr[startProcStr.length() - 1] = ')';
+            res += "=";
+            startProcStr += ")|";
+            os << res << endl;
+            translateProcess(p, os, confPropMap);
+        }
+        startProcStr[startProcStr.length() - 1] = ')';
+        os << endStr << endl;
+        os << startProcStr << endl;
     }
 }
 

@@ -117,6 +117,7 @@ int main(int argc, char *argv[]) {
         if(program["-k"] == true){
             XmlParser::parse(file.c_str(), &model);
             cout << "#true#";
+            exit(0);
         }
         else{
             XmlParser::parse(file.c_str(), &model);
@@ -127,7 +128,7 @@ int main(int argc, char *argv[]) {
                 //auto sm = proc->getStateMachines().front();
                 ProverifTranslator proverifTranslator(&model);
                 proverifTranslator.translate();
-                //system("./proverif proverifModel.pv");
+                system("./proverif proverif.pv");
             } else if (program["-engine=beagle"] == true) {
                 //this is an example for make a statemahine for beagle.
                 //auto proc = model.getProcesses().front();
