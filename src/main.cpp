@@ -128,16 +128,16 @@ int main(int argc, char *argv[]) {
                 //auto sm = proc->getStateMachines().front();
                 ProverifTranslator proverifTranslator(&model);
                 proverifTranslator.translate();
-                system("./proverif proverif.pv");
+                system("./proverif proverif.pv | grep RES");
             } else if (program["-engine=beagle"] == true) {
                 //this is an example for make a statemahine for beagle.
-                //auto proc = model.getProcesses().front();
-                //auto sm = proc -> getStateMachines().front();
-                //auto bsm = proc -> mkBeagleStateMachine(sm);
-                //BeagleTranslator* beagleTranslator = new BeagleTranslator();
-                //beagleTranslator->beagleTranslate(&model);
-                //system("./beagle -bmc beagleModel.elt");
-                //bsm -> print();
+                auto proc = model.getProcesses().front();
+                auto sm = proc -> getStateMachines().front();
+                auto bsm = proc -> mkBeagleStateMachine(sm);
+                BeagleTranslator* beagleTranslator = new BeagleTranslator();
+                beagleTranslator->beagleTranslate(&model);
+                system("./beagle -bmc beagleModel.elt");
+                bsm -> print();
             } else {
                 //this is an example for make a statemahine for beagle.
                 //model.mkCommProductStateMahine();
