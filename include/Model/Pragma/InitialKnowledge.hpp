@@ -35,7 +35,9 @@ namespace isadt {
         Process* getProc() {return this->proc_;}
         Attribute* getAttribute() {return this->attribute_;}
         InitialKnowledge* getPkKnowledge() {return this->pkKnowledge_;}
-        bool isKeyPair();
+        bool isKeyPair() {
+            return pkKnowledge_;
+        }
     private:
         Process* proc_;
         Attribute* attribute_;

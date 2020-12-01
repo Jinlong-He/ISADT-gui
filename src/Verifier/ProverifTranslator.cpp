@@ -17,6 +17,7 @@ namespace isadt {
                     }
                     auto childTerm = at -> getChildren().front();
                     auto child = ((AttributeTerm*)((Expression*)childTerm) -> getTerm1()) -> getAttribute();
+                    cout << action -> getRhs() -> getChildren().size() << endl;
                     if (action -> getRhs() -> getChildren().size() == 0) {
                         string name = ((AttributeTerm*)action -> getRhs()) -> getAttribute() -> getIdentifier();
                         attrMap.at(attr -> getIdentifier())[type -> getID(child -> getIdentifier())] = name;
@@ -40,7 +41,6 @@ namespace isadt {
     }
 
     void ProverifTranslator::translateProcess(Process* process) {
-        string res = "let process" + process -> getName() + "(";
         unordered_set<string> attrSet;
         auto sm = process -> getStateMachines().front();
         auto vertex = sm -> getStartVertex();
@@ -148,7 +148,33 @@ namespace isadt {
     }
 
     void ProverifTranslator::translate() {
+        unordered_map<Process*, vector<Attribute*> > knowledgeMap;
+        unordered_map<string, string> pairMap;
+        for (auto n : model_ -> getInitialKnowledges()) {
+            if (!n -> isKeyPair()) {
+                knowledgeMap[n -> getProc()].push_back(n -> getAttribute());
+            } else {
+                string pkStr = n -> getAttribute() -> getType() -> getName();
+                if (pkStr == "sskey") pkStr = "spk";
+                if (pkStr == "sskey") pkStr = "pk";
+                pairMap[n -> getAttribute() -> getIdentifier()] =
+                        n -> getPkKnowledge() -> getAttribute() -> getIdentifier(); 
+                string res = "new " + n -> getAttribute() -> getIdentifier() + ": "
+                    + n -> getAttribute() -> getType() -> getName() + ";";
+                res += "let " + n -> getPkKnowledge() -> getAttribute() -> getIdentifier()
+                    + "=" + pkStr + "(" + n -> getAttribute() -> getIdentifier() + ") in out(c, " 
+                    + n -> getPkKnowledge() -> getAttribute() -> getIdentifier() + ");";
+                cout << res << endl;
+            }
+        }
         for (auto p : model_ -> getProcesses()) {
+            string res = "let process" + p -> getName() + "( ";
+            for (auto attr : knowledgeMap[p]) {
+                res += attr -> getIdentifier() + " : " + attr -> getType() -> getName() + ",";
+            }
+            res[res.length() - 1] = ')';
+            res += "=";
+            cout << res << endl;
             translateProcess(p);
         }
     }
