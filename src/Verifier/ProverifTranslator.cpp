@@ -1,8 +1,10 @@
 #include "Verifier/ProverifTranslator.hpp"
+#include <iostream>
+#include <fstream>
 using std::cout, std::endl;
 namespace isadt {
     void getMessage(const list<Action*>& actions, unordered_map<string, vector<string>>& attrMap,
-            unordered_map<string, string>& strMap) {
+            unordered_map<string, string>& strMap, std::ostream& os) {
         for (auto action : actions) {
             if (action -> isAssignmentAction()) {
                 if (action -> getLhs() -> getTermType() == AT) {
@@ -17,7 +19,7 @@ namespace isadt {
                     }
                     auto childTerm = at -> getChildren().front();
                     auto child = ((AttributeTerm*)((Expression*)childTerm) -> getTerm1()) -> getAttribute();
-                    cout << action -> getRhs() -> getChildren().size() << endl;
+                    //os << action -> getRhs() -> getChildren().size() << endl;
                     if (action -> getRhs() -> getChildren().size() == 0) {
                         string name = ((AttributeTerm*)action -> getRhs()) -> getAttribute() -> getIdentifier();
                         attrMap.at(attr -> getIdentifier())[type -> getID(child -> getIdentifier())] = name;
@@ -40,7 +42,8 @@ namespace isadt {
         }
     }
 
-    void ProverifTranslator::translateProcess(Process* process) {
+    void ProverifTranslator::translateProcess(Process* process, std::ostream& os) {
+        os << "free c : channel." << endl;
         unordered_set<string> attrSet;
         auto sm = process -> getStateMachines().front();
         auto vertex = sm -> getStartVertex();
@@ -61,7 +64,7 @@ namespace isadt {
         for (auto action : actions) {
             if (action -> isAssignmentAction()) {
                 if (!action -> getRhs() && action -> getLhs() -> getTermType() == MT) {
-                    getMessage(messageActions, attrMap, strMap);
+                    getMessage(messageActions, attrMap, strMap, os);
                     messageActions.clear();
                     auto methodTerm = ((MethodTerm*)action -> getLhs());
                     auto method = methodTerm -> getMethod();
@@ -73,7 +76,7 @@ namespace isadt {
                             string name = method -> getName() + "_m";
                             string res1 = "in(c," + name + ": bitstring);";
                             string res2 = "let " + messStr + " = " + name + " in";
-                            cout << res1 << endl << res2 << endl;
+                            os << res1 << endl << res2 << endl;
                         } else {
                             string res = "out(c,";
                             if (signMap.count(messStr) > 0) {
@@ -81,7 +84,7 @@ namespace isadt {
                             } else {
                                 res += messStr + ");";
                             }
-                            cout << res << endl;
+                            os << res << endl;
                         }
                     } else {
                         if (method -> getName() == "Sign") {
@@ -124,7 +127,7 @@ namespace isadt {
                             res1[res1.length() - 1] = ')';
                             res2[res2.length() - 1] = ')';
                             string res = res1 + res2 + " in";
-                            cout << res << endl;
+                            os << res << endl;
                         }
                     }
                 } else {
@@ -136,7 +139,7 @@ namespace isadt {
                             if (attrSet.count(attrStr) == 0) {
                                 attrSet.insert(attrStr);
                                 string res = "new " + attrStr + ":" + typeStr + ";";
-                                cout << res << endl;
+                                os << res << endl;
                             }
                         } else {
                         }
@@ -148,23 +151,26 @@ namespace isadt {
     }
 
     void ProverifTranslator::translate() {
+        std::ofstream os;
+        os.open("proverif.pv");
         unordered_map<Process*, vector<Attribute*> > knowledgeMap;
         unordered_map<string, string> pairMap;
+        string endStr = "";
         for (auto n : model_ -> getInitialKnowledges()) {
             if (!n -> isKeyPair()) {
                 knowledgeMap[n -> getProc()].push_back(n -> getAttribute());
             } else {
                 string pkStr = n -> getAttribute() -> getType() -> getName();
                 if (pkStr == "sskey") pkStr = "spk";
-                if (pkStr == "sskey") pkStr = "pk";
+                if (pkStr == "skey") pkStr = "pk";
                 pairMap[n -> getAttribute() -> getIdentifier()] =
                         n -> getPkKnowledge() -> getAttribute() -> getIdentifier(); 
                 string res = "new " + n -> getAttribute() -> getIdentifier() + ": "
                     + n -> getAttribute() -> getType() -> getName() + ";";
                 res += "let " + n -> getPkKnowledge() -> getAttribute() -> getIdentifier()
                     + "=" + pkStr + "(" + n -> getAttribute() -> getIdentifier() + ") in out(c, " 
-                    + n -> getPkKnowledge() -> getAttribute() -> getIdentifier() + ");";
-                cout << res << endl;
+                    + n -> getPkKnowledge() -> getAttribute() -> getIdentifier() + ");\n";
+                endStr += res;
             }
         }
         for (auto p : model_ -> getProcesses()) {
@@ -174,9 +180,10 @@ namespace isadt {
             }
             res[res.length() - 1] = ')';
             res += "=";
-            cout << res << endl;
-            translateProcess(p);
+            os << res << endl;
+            translateProcess(p, os);
         }
+        os << endStr << endl;
     }
 }
 
