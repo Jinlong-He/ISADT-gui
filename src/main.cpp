@@ -113,14 +113,14 @@ int main(int argc, char *argv[]) {
     }
     auto file = program.get<vector<string>>("-i")[0];
     try {
+        Model model;
         if(program["-k"] == true){
-            Model model;
             XmlParser::parse(file.c_str(), &model);
             cout << "#true#";
         }
-
-        Model model;
-        XmlParser::parse(file.c_str(), &model);
+        else{
+            XmlParser::parse(file.c_str(), &model);
+        }
         if (program["-v"] == true) {
             if (program["-engine=proverif"] == true) {
                 //auto proc = model.getProcesses().front();
