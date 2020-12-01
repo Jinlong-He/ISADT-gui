@@ -42,8 +42,7 @@ namespace isadt {
         }
     }
 
-    void ProverifTranslator::translateProcess(Process* process, std::ostream& os) {
-        os << "free c : channel." << endl;
+    void ProverifTranslator::translateProcess(Process* process, std::ostream& os, unordered_map<Process*, vector<Attribute*>>& confPropMap) {
         unordered_set<string> attrSet;
         auto sm = process -> getStateMachines().front();
         auto vertex = sm -> getStartVertex();
@@ -122,7 +121,7 @@ namespace isadt {
                             for (auto attr : type -> getAttributes()) {
                                 string name = type -> getName() + "_" + attr -> getIdentifier();
                                 vec.push_back(name);
-                                res1 += name + ",";
+                                res1 += name + ":int ,";
                             }
                             res1[res1.length() - 1] = ')';
                             res2[res2.length() - 1] = ')';
@@ -148,42 +147,75 @@ namespace isadt {
                 }
             }
         }
+        if (confPropMap.count(process) > 0) {
+            for (auto attr : confPropMap.at(process)) {
+                os << "let " + process -> getName() + attr -> getIdentifier()
+                    + "=" + attr -> getIdentifier() + "." << endl;
+            }
+        } else {
+            os << "new end:bitstring;" << endl;
+            os << "out(c, end)." << endl;
+        }
     }
 
     void ProverifTranslator::translate() {
         std::ofstream os;
         os.open("proverif.pv");
+        os << "free c : channel." << endl;
+        os << "type spkey." << endl;
+        os << "type sskey." << endl;
+        os << "type int." << endl;
+        os << "fun spk(sskey): spkey." << endl;
+        os << "fun sign(bitstring, sskey): bitstring." << endl;
+        os << "reduc forall x: bitstring, y: sskey; getmess(sign(x,y)) = x." << endl;
+        os << "reduc forall x: bitstring, y: sskey; checksign(sign(x,y), spk(y)) = x." << endl;
+        unordered_map<Process*, vector<Attribute*>> confPropMap;
+        for (auto p : model_ -> getProps()) {
+            if (p -> getPropertyType() == CONFIDENTIAL) {
+                auto pp = ((ConfidentialProperty*) p);
+                os << "query secret " + pp -> getProc() -> getName() + pp -> getAttribute() -> getIdentifier() + "." << endl;
+                confPropMap[pp -> getProc()].push_back(pp -> getAttribute());
+            }
+        }
         unordered_map<Process*, vector<Attribute*> > knowledgeMap;
         unordered_map<string, string> pairMap;
-        string endStr = "";
+        string endStr = "process\n";
+        string startProcStr = "(";
         for (auto n : model_ -> getInitialKnowledges()) {
             if (!n -> isKeyPair()) {
                 knowledgeMap[n -> getProc()].push_back(n -> getAttribute());
             } else {
                 string pkStr = n -> getAttribute() -> getType() -> getName();
-                if (pkStr == "sskey") pkStr = "spk";
-                if (pkStr == "skey") pkStr = "pk";
+                if (pkStr == "spkey") pkStr = "spk";
+                if (pkStr == "pkey") pkStr = "pk";
                 pairMap[n -> getAttribute() -> getIdentifier()] =
                         n -> getPkKnowledge() -> getAttribute() -> getIdentifier(); 
-                string res = "new " + n -> getAttribute() -> getIdentifier() + ": "
-                    + n -> getAttribute() -> getType() -> getName() + ";";
-                res += "let " + n -> getPkKnowledge() -> getAttribute() -> getIdentifier()
-                    + "=" + pkStr + "(" + n -> getAttribute() -> getIdentifier() + ") in out(c, " 
+                string res = "new " + n -> getPkKnowledge() -> getAttribute() -> getIdentifier() + ": "
+                    + n -> getPkKnowledge() -> getAttribute() -> getType() -> getName() + ";";
+                res += "let " +n -> getAttribute() -> getIdentifier()
+                    + "=" + pkStr + "(" + n -> getPkKnowledge() -> getAttribute() -> getIdentifier() + ") in out(c, " 
                     + n -> getPkKnowledge() -> getAttribute() -> getIdentifier() + ");\n";
+
                 endStr += res;
             }
         }
         for (auto p : model_ -> getProcesses()) {
             string res = "let process" + p -> getName() + "( ";
+            startProcStr += "(!process" + p -> getName() + "(";
             for (auto attr : knowledgeMap[p]) {
                 res += attr -> getIdentifier() + " : " + attr -> getType() -> getName() + ",";
+                startProcStr += attr -> getIdentifier() + ",";
             }
             res[res.length() - 1] = ')';
+            startProcStr[startProcStr.length() - 1] = ')';
             res += "=";
+            startProcStr += ")|";
             os << res << endl;
-            translateProcess(p, os);
+            translateProcess(p, os, confPropMap);
         }
+        startProcStr[startProcStr.length() - 1] = ')';
         os << endStr << endl;
+        os << startProcStr << endl;
     }
 }
 

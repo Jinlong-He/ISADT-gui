@@ -56,6 +56,9 @@ namespace isadt {
               proc_(proc),
               attribute_(attribute) {}
     public:
+        Process* getProc() {
+            return proc_;
+        }
         Attribute* getAttribute() {return this->attribute_;}
         PropertyType getPropertyType() const { return CONFIDENTIAL; }
     private:

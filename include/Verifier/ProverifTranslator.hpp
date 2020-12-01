@@ -12,7 +12,7 @@ namespace isadt {
             : model_(model) {}
 
         void translate();
-        void translateProcess(Process* proc, std::ostream& os);
+        void translateProcess(Process* proc, std::ostream& os, unordered_map<Process*, vector<Attribute*>>& confPropMap);
     private:
         Model* model_;
     };
